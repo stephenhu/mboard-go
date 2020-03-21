@@ -1,0 +1,10 @@
+create table if not exists media(
+  id INTEGER NOT NULL PRIMARY KEY,
+  game_id INTEGER,
+  key VARCHAR NOT NULL UNIQUE,
+  meta VARCHAR,
+  tags VARCHAR,
+  created DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(game_id) REFERENCES games(id)
+);

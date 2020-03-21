@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Exec=/usr/bin/chromium-browser --noerrdialogs --disable-session-crashed-bubble --disable-infobars --incognito --password-store=basic --kiosk http://127.0.0.1:8000/setup
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=mboard

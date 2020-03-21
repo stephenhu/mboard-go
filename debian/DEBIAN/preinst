@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+# add mboard user
+
+if ! getent passwd mboard >/dev/null; then
+  adduser --system --home /home/mboard --shell /bin/bash --group mboard
+fi
+
+exit 0
+

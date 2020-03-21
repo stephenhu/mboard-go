@@ -1,0 +1,13 @@
+mboard-go
+.DS_Store
+jquery
+bootstrap
+bootstrap-select
+font-awesome
+db/mboard.db
+data/mboard.db
+qr.png
+test.log
+data
+blobs
+*.gz

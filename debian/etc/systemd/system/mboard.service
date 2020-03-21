@@ -1,0 +1,13 @@
+[Unit]
+Description=madsportslab mboard daemon
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/mboard/bin
+ExecStart=/home/mboard/bin/mboard-go -mode 1 -database /home/mboard/data/mboard.db
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
