@@ -1,129 +1,169 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
+	//"fmt"
   "log"
 	"net/http"
+	//"time"
 
-  "github.com/gorilla/mux"
+	"github.com/gomodule/redigo/redis"
+	"github.com/gorilla/mux"
 )
 
+type GameData struct {
+	Home				*Team			`json:"home"`
+	Away				*Team			`json:"away"`
+	ShotClock		Clock     `json:"shotClock"`
+	GameClock		Clock     `json:"gameClock"`
+	Period      int       `json:"period"`
+	Possession  bool      `json:"possession"`
+	Status      int       `json:"status"`
+}
+
+type Plays struct {
+	Logs 				[]Log			`json:"logs"`
+}
+
 type GameRecord struct {
-	Home		*Team			`json:"home"`
-	Away		*Team			`json:"away"`
-}
-
-type GameTbl struct {
-	ID			string 	`json:"id"`
-  Data    sql.NullString `json:"data"`
-	Created string 	`json:"created"`
-	Updated string 	`json:"updated"`
-	Status  int 		`json:"status"`
+	Config      GameConfig			`json:"config"`
+	Data        GameData        `json:"data"`
+	Plays           `json:"plays"`
 }
 
 
-func addGame() int64 {
+func addGame(config string, ts int64) {
 
-	res, err := data.Exec(
-		GameCreate,
-	)
+	rp := Red.Get()
+
+	err := rp.Send(HSET, ts, KEY_FIELD_CONFIG, config)
 
 	if err != nil {
 		log.Println(err)
-		return -1
-	}
+	} else {
 
-	id, err := res.LastInsertId()
-
-	if err != nil {
-		
-		log.Println(err)
-		return -1
+		rp.Flush()
+		rp.Close()
 
 	}
-
-	return id
 
 } // addGame
 
-func updateGame(id int64, val string) {
 
-	_, err := data.Exec(
-		GameUpdate, val, 1, id,
-	)
+func updateGameData(id string, gd GameData) {
+
+	rp := Red.Get()
+
+	j, err := json.Marshal(gd)
 
 	if err != nil {
 		log.Println(err)
+	} else {
+
+		_, err := rp.Do(HSET, id, KEY_FIELD_DATA, j)
+
+		if err != nil {
+			log.Println(err)
+		}
+
 	}
 
-} // updateGame
+} // updateGameData
 
-func getGames() []GameTbl {
 
-  rows, err := data.Query(
-		GamesGet,
-	)
+func getGameData(id string) []string {
+
+	rp := Red.Get()
+
+	d, err := redis.Strings(rp.Do(HGET, id, KEY_FIELD_DATA))
 
 	if err != nil {
-		log.Printf("[%s][Error][DB] %s", version(), err)
+		log.Println(err)
 		return nil
+	} else {
+		return d
 	}
 
-	defer rows.Close()
+} // getGameData
 
-	gt := []GameTbl{}
 
-	for rows.Next() {
-
-			g := GameTbl{}
-
-			err := rows.Scan(&g.ID, &g.Data, &g.Status, &g.Created, &g.Updated)
-
-			if err == sql.ErrNoRows || err != nil {
-				log.Printf("[%s][Error] %s", version(), err)
-				return nil
-			}
-
-			gt = append(gt, g)
-
-	}
-
-	return gt
-
+func getGames() []GameRecord {
+	return nil
 } // getGames
 
-func getGame(id string) *GameTbl {
 
-  row := data.QueryRow(
-		GameGet, id,
-	)
+func getGameRecord(id string) *GameRecord {
 
-	gt := GameTbl{}
-
-	err := row.Scan(&gt.ID, &gt.Data, &gt.Status, &gt.Created, &gt.Updated)
-
-	if err == sql.ErrNoRows || err != nil {
-		log.Printf("[%s][Error] %s", version(), err)
+	if id == "" {
 		return nil
 	}
 
-	return &gt
+	rp := Red.Get()
 
-} // getGame
+	all, err := redis.StringMap(rp.Do(HGETALL, id))
+
+	if err != nil {
+		log.Println(err)
+	} else {
+
+		gr := GameRecord{}
+
+		for k, v := range all {
+
+			switch k {
+			case KEY_FIELD_CONFIG:
+
+				conf := GameConfig{}
+
+				err := json.Unmarshal([]byte(v), &conf)
+
+				if err != nil {
+					log.Println(err)
+				} else {
+					gr.Config = conf
+				}
+
+			case KEY_FIELD_DATA:
+
+				gd := GameData{}
+
+				err := json.Unmarshal([]byte(v), &gd)
+
+				if err != nil {
+					log.Println(err)
+				} else {
+					gr.Data = gd
+				}
+
+			case KEY_FIELD_PLAYS:
+
+				p := Plays{}
+
+				err := json.Unmarshal([]byte(v), &p)
+
+				if err != nil {
+					log.Println(err)
+				} else {
+					gr.Plays = p
+				}
+
+			}
+
+		}
+
+		return &gr
+
+	}
+
+	return nil
+
+} // getGameRecord
+
 
 func deleteGame(id string) {
 
-  _, err := data.Exec(
-		GameDelete, id,
-	)
-
-	if err != nil {
-		log.Printf("[%s][Error] %s", version(), err)
-		return
-	}
-
 } // deleteGame
+
 
 func scoreHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -137,9 +177,9 @@ func scoreHandler(w http.ResponseWriter, r *http.Request) {
 
 		if id != "" {
 
-			g := getGame(id)
+			g, ok := gameMap[id]
 
-			if g == nil {
+			if !ok {
 				w.WriteHeader(http.StatusNotFound)
 			} else {
 
@@ -178,7 +218,7 @@ func scoreHandler(w http.ResponseWriter, r *http.Request) {
 		id := vars["id"]
 
 		if id != "" {
-			
+
 			deleteGame(id)
 
 			w.WriteHeader(http.StatusOK)

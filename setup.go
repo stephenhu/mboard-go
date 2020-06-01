@@ -41,7 +41,7 @@ func getAddress() (string, error) {
 	}
 
 	if name == INTERFACE_CLOUD {
-		return fmt.Sprintf(":%s", *port), nil
+		return fmt.Sprintf(":%s", app.Server.Port), nil
 	}
 
   ifs, err := net.Interfaces()
@@ -53,7 +53,7 @@ func getAddress() (string, error) {
 	for _, iface := range ifs {
 
 		if strings.HasPrefix(iface.Name, name) {
-			
+
 			addrs, err := iface.Addrs()
 
 			if err != nil {
@@ -69,9 +69,9 @@ func getAddress() (string, error) {
 				if ok {
 
 					if ipnet.IP.To4() != nil {
-						return fmt.Sprintf("%s:%s", ipnet.IP.String(), *port), nil
+						return fmt.Sprintf("%s:%s", ipnet.IP.String(), app.Server.Port), nil
 					}
-					
+
 				}
 
 			}
@@ -84,6 +84,7 @@ func getAddress() (string, error) {
 
 } // getAddress
 
+
 func setupHandler(w http.ResponseWriter, r *http.Request) {
 
   switch r.Method {
@@ -94,7 +95,7 @@ func setupHandler(w http.ResponseWriter, r *http.Request) {
 		parseErr := compiler.ParseFile("mboard-www/setup.amber")
 
 		if parseErr != nil {
-			
+
 			log.Printf("[%s][Error] %s", version(), parseErr)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -104,14 +105,14 @@ func setupHandler(w http.ResponseWriter, r *http.Request) {
 		template, compileErr := compiler.Compile()
 
 		if compileErr != nil {
-			
+
 			log.Printf("[%s][Error] %s", version(), compileErr)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 
 		}
 
-		template.Execute(w, nil)		
+		template.Execute(w, nil)
 
 	default:
 	  w.WriteHeader(http.StatusMethodNotAllowed)

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"log"
 	"net/http"
-	"strings"
+	//"strings"
 
 	"github.com/eknkc/amber"
 )
@@ -16,13 +16,13 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
   case http.MethodGet:
 
 		compiler := amber.New()
-		
-		resource := strings.Trim(r.URL.Path, "/")
 
-		err := compiler.ParseFile(fmt.Sprintf("mboard-www/%s.amber", resource))
+		//resource := strings.Trim(r.URL.Path, "/")
+
+		err := compiler.ParseFile("client/index.amber")
 
 		if err != nil {
-			
+
 			log.Printf("[%s][Error] %s", version(), err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -32,7 +32,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		template, err2 := compiler.Compile()
 
 		if err2 != nil {
-			
+
 			log.Printf("[%s][Error] %s", version(), err2)
 			w.WriteHeader(http.StatusInternalServerError)
 			return

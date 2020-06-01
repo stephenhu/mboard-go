@@ -1,0 +1,55 @@
+extends layout
+
+block content
+  div.container-fluid
+    button.btn.btn-success[onclick="newGame(); return false;"] new game
+    label[id="gameId"]
+    br
+    br
+    label periods
+    select[id="periods"]
+      option[value=2] 2
+      option[value=4] 4
+    br
+    label minutes
+    input[type="text"][id="minutes"][value=12]
+    br
+    label shot clock
+    input[type="text"][id="shot"][value=24]
+    br
+    label timeouts
+    select[id="timeouts"]
+      option[value=3][default] 3
+      option[value=4] 4
+      option[value=5] 5
+    br
+    label fouls
+    input[type="text"][id="fouls"][value=10]
+    br
+    label home
+    input[type="text"][id="home"][value="red"]
+    br
+    label away
+    input[type="text"][id="away"][value="blue"]
+    br
+    br
+    hr
+    button[onclick="connectScoreboard(); return false;"] connect scoreboard
+    br
+    br
+    h3[id="gameClock"] 12:00
+    button[onclick="sendCommand('CLOCK_START', ''); return false;"] start clock
+    button[onclick="sendCommand('CLOCK_STOP', ''); return false;"] stop clock
+    button rev clock
+    button fwd clock
+    br
+    br
+    h3 away
+    h3[id="awayScore"] 0
+    button add point
+    button sub point
+    br
+    h3 home
+    h3[id="homeScore"] 0
+    button add point
+    button sub point

@@ -18,7 +18,7 @@ func photoHandler(w http.ResponseWriter, r *http.Request) {
 		err := compiler.ParseFile("mboard-www/photo.amber")
 
 		if err != nil {
-			
+
 			log.Printf("[%s][Error] %s", version(), err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -28,14 +28,14 @@ func photoHandler(w http.ResponseWriter, r *http.Request) {
 		template, err2 := compiler.Compile()
 
 		if err2 != nil {
-			
+
 			log.Printf("[%s][Error] %s", version(), err2)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 
 		}
 
-		template.Execute(w, data)
+		template.Execute(w, nil)
 
   case http.MethodPost:
   case http.MethodDelete:

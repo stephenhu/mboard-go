@@ -7,6 +7,7 @@ import (
   "net/http"
 	//"sync"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -96,19 +97,20 @@ var periodNames = []string{"1st", "2nd", "3rd", "4th"}
 
 //var connections = make(map[string]map[*websocket.Conn]*sync.Mutex)
 
-func calcTotalScore(home bool) int {
+
+func calcTotalScore(home bool, g *GameInfo) int {
 
   total := 0
 
 	if home {
 
-    for _, v := range game.GameData.Home.Points {
+    for _, v := range g.GameData.Home.Points {
 			total = total + v
 		}
 
 	} else {
 
-    for _, v := range game.GameData.Away.Points {
+    for _, v := range g.GameData.Away.Points {
 			total = total + v
 		}
 
@@ -118,127 +120,130 @@ func calcTotalScore(home bool) int {
 
 } // calcTotalScore
 
-func incrementPoints(name string, val int) {
 
-  if game == nil {
+func incrementPoints(name string, val int, g *GameInfo) {
+
+  if g == nil {
 		return
 	}
 
   if name == HOME {
 
-		total := game.GameData.Home.Points[game.GameData.Period]
-		
+		total := g.GameData.Home.Points[g.GameData.Period]
+
 		if (total + val) < 0 {
 			return
 		}
 
-		game.GameData.Home.Points[game.GameData.Period] = total +
+		g.GameData.Home.Points[g.GameData.Period] = total +
 			val
 
-		pushString(WS_RET_HOME_SCORE, fmt.Sprintf("%d", calcTotalScore(true)))
-		
+		pushString(WS_RET_HOME_SCORE, fmt.Sprintf("%d", calcTotalScore(true, g)))
+
 	} else if name == AWAY {
 
-		total := game.GameData.Away.Points[game.GameData.Period]
-		
+		total := g.GameData.Away.Points[g.GameData.Period]
+
 		if (total + val) < 0 {
 			return
 		}
 
-		game.GameData.Away.Points[game.GameData.Period] = total +
+		g.GameData.Away.Points[g.GameData.Period] = total +
 			val
 
-		pushString(WS_RET_AWAY_SCORE, fmt.Sprintf("%d", calcTotalScore(false)))
-		
+		pushString(WS_RET_AWAY_SCORE, fmt.Sprintf("%d", calcTotalScore(false, g)))
+
 	}
 
 } // incrementPoints
 
-func incrementFoul(name string, val int) {
 
-  if game == nil {
+func incrementFoul(name string, val int, g *GameInfo) {
+
+  if g == nil {
 		return
 	}
 
   if name == HOME {
 
-		if game.GameData.Home.Fouls + val < 0 {
+		if g.GameData.Home.Fouls + val < 0 {
 			return
 		}
 
-		game.GameData.Home.Fouls = game.GameData.Home.Fouls + val
-		
-		pushString(WS_RET_HOME_FOUL, fmt.Sprintf("%d", game.GameData.Home.Fouls))
+		g.GameData.Home.Fouls = g.GameData.Home.Fouls + val
+
+		pushString(WS_RET_HOME_FOUL, fmt.Sprintf("%d", g.GameData.Home.Fouls))
 
 	} else if name == AWAY {
 
-		if game.GameData.Away.Fouls + val < 0  {
+		if g.GameData.Away.Fouls + val < 0  {
 			return
 		}
 
-		game.GameData.Away.Fouls = game.GameData.Away.Fouls + val
+		g.GameData.Away.Fouls = g.GameData.Away.Fouls + val
 
-		pushString(WS_RET_AWAY_FOUL, fmt.Sprintf("%d", game.GameData.Away.Fouls))
+		pushString(WS_RET_AWAY_FOUL, fmt.Sprintf("%d", g.GameData.Away.Fouls))
 
 	}
 
 } // incrementFoul
 
-func incrementTimeout(name string, val int) bool {
 
-  if game == nil {
+func incrementTimeout(name string, val int, g *GameInfo) bool {
+
+  if g == nil {
 		return false
 	}
 
   if name == HOME {
 
-		if game.GameData.Home.Timeouts + val < 0 {
-				
+		if g.GameData.Home.Timeouts + val < 0 {
+
 			return false
 
-		} else if game.Settings.Timeouts < (game.GameData.Home.Timeouts + val) {
-		
+		} else if g.Settings.Timeouts < (g.GameData.Home.Timeouts + val) {
+
 			return false
 
 		} else {
-		
-			game.GameData.Home.Timeouts = game.GameData.Home.Timeouts + val
-			
+
+			g.GameData.Home.Timeouts = g.GameData.Home.Timeouts + val
+
 			if val == -1 {
 				pushString(WS_RET_HOME_TIMEOUT, fmt.Sprintf(
-					"%d", game.GameData.Home.Timeouts))
+					"%d", g.GameData.Home.Timeouts))
 			} else if val == 1 {
 				pushString(WS_RET_HOME_TIMEOUT_CANCEL, fmt.Sprintf(
-					"%d", game.GameData.Home.Timeouts))
+					"%d", g.GameData.Home.Timeouts))
 			}
 
 			return true
 
 		}
-		
+
 	} else if name == AWAY {
 
-		if game.GameData.Away.Timeouts + val < 0 {
+		if g.GameData.Away.Timeouts + val < 0 {
 
 			return false
 
-		} else if game.Settings.Timeouts < (game.GameData.Away.Timeouts + val) {
-			
+		} else if g.Settings.Timeouts < (g.GameData.Away.Timeouts + val) {
+
 			return false
 
 		} else {
 
-			game.GameData.Away.Timeouts = game.GameData.Away.Timeouts + val
-			
+			g.GameData.Away.Timeouts = g.GameData.Away.Timeouts + val
+
 			if val == -1 {
-				pushString(WS_RET_AWAY_TIMEOUT, fmt.Sprintf("%d", game.GameData.Away.Timeouts))
+				pushString(WS_RET_AWAY_TIMEOUT, fmt.Sprintf("%d", g.GameData.Away.Timeouts))
 			} else {
-				pushString(WS_RET_AWAY_TIMEOUT_CANCEL, fmt.Sprintf("%d", game.GameData.Away.Timeouts))
+				pushString(WS_RET_AWAY_TIMEOUT_CANCEL, fmt.Sprintf("%d", g.GameData.Away.Timeouts))
 			}
-	
+
 			return true
-			
-		}	
+
+		}
 
 	} else {
 		return false
@@ -246,31 +251,33 @@ func incrementTimeout(name string, val int) bool {
 
 } // incrementTimeout
 
-func incrementPeriod(val int) {
 
-	if (game.GameData.Period + val) < 0 {
+func incrementPeriod(val int, g *GameInfo) {
+
+	if (g.GameData.Period + val) < 0 {
 		return
 	}
 
-  game.GameData.Period = game.GameData.Period + val
+  g.GameData.Period = g.GameData.Period + val
 
-	game.GameData.Clk.GameClockReset()
+	g.GameData.Clk.GameClockReset()
 
-  pushString(WS_RET_PERIOD, fmt.Sprintf("%d", game.GameData.Period))
+  pushString(WS_RET_PERIOD, fmt.Sprintf("%d", g.GameData.Period))
 
 } // incrementPeriod
 
-func setPossession(name string, stopClock bool) {
+
+func setPossession(name string, stopClock bool, g *GameInfo) {
 
   if name == HOME {
- 	 	
-		game.GameData.Possession = true
+
+		g.GameData.Possession = true
 
 		pushString(WS_RET_POSSESSION_HOME, fmt.Sprintf("%b", stopClock))
 
 	} else if name == AWAY {
-		
-		game.GameData.Possession = false
+
+		g.GameData.Possession = false
 
 		pushString(WS_RET_POSSESSION_AWAY, fmt.Sprintf("%b", stopClock))
 
@@ -278,68 +285,87 @@ func setPossession(name string, stopClock bool) {
 		log.Println("Error: setPossession(), invalid possession string.")
 	}
 
-	game.GameData.Clk.ShotClockReset()
+	g.GameData.Clk.ShotClockReset()
 
 	if stopClock {
-		game.GameData.Clk.Stop()
+		g.GameData.Clk.Stop()
 	} else {
-		game.GameData.Clk.Start()
+		g.GameData.Clk.Start()
 	}
 
 } // setPossession
 
-func togglePossession(stopClock bool) {
 
-	if game.GameData.Possession {
-		
-		game.GameData.Possession = false
+func togglePossession(stopClock bool, g *GameInfo) {
+
+	if g.GameData.Possession {
+
+		g.GameData.Possession = false
 		pushString(WS_RET_POSSESSION_AWAY, fmt.Sprintf("%b", stopClock))
 
 	} else {
-		game.GameData.Possession = true
+		g.GameData.Possession = true
 	  pushString(WS_RET_POSSESSION_HOME, fmt.Sprintf("%b", stopClock))
 	}
 
-	game.GameData.Clk.ShotClockReset()
+	g.GameData.Clk.ShotClockReset()
 
 	if stopClock {
-		game.GameData.Clk.Stop()
+		g.GameData.Clk.Stop()
 	} else {
-		game.GameData.Clk.Start()
+		g.GameData.Clk.Start()
 	}
 
 } // togglePossession
 
-func firehose(game *GameInfo) {
 
-  for {
+func firehose(g *GameInfo) {
+
+	for {
 
 		select {
-		case <-game.GameData.Clk.ShotViolationChan:
-		
-		  game.GameData.Clk.Ticker.Stop()
-			
+		case <-g.GameData.Clk.ShotViolationChan:
+
+			g.GameData.Clk.Ticker.Stop()
+
 			// TODO: play sound
 			pushString(WS_RET_SHOT_VIOLATION, "1")
-			togglePossession(true)
-			
-		
-		case <-game.GameData.Clk.FinalChan:
+			togglePossession(true, g)
 
-		  game.GameData.Clk.Ticker.Stop()
+
+		case <-g.GameData.Clk.FinalChan:
+
+			g.GameData.Clk.Ticker.Stop()
 			pushString(WS_RET_END_PERIOD, "1")
-		
-		case s := <-game.GameData.Clk.OutChan:
-		  pushString(WS_RET_CLOCK, string(s))
+
+		case s := <-g.GameData.Clk.OutChan:
+			pushString(WS_RET_CLOCK, string(s))
 		}
 
 	}
 
 } // firehose
 
+
 func controlHandler(w http.ResponseWriter, r *http.Request) {
 
-  upgrader := websocket.Upgrader {
+	vars := mux.Vars(r)
+
+	id := vars["id"]
+
+	if id == "" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	g, ok := gameMap[id]
+
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	upgrader := websocket.Upgrader {
 		ReadBufferSize:		1024,
 		WriteBufferSize: 	1024,
 		CheckOrigin:		func(r *http.Request) bool { return true },
@@ -348,23 +374,18 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
-		
+
 		log.Println("[Error]", err)
 		return
 
 	}
 
-	if game.Settings == nil {
-		log.Println("game.Settings is nil")
-		return
-	}
-  
-	go firehose(game)
+	go firehose(&g)
 
 	defer c.Close()
 
 	for {
-   
+
 		_, msg, err := c.ReadMessage()
 
 		if err != nil {
@@ -374,118 +395,119 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 
 		}
 
-    if msg == nil {
+		if msg == nil {
 			log.Println(msg)
 			break
 		}
 
-    req := Req{}
+		req := Req{}
 
 		json.Unmarshal(msg, &req)
-		
+
 		log.Println(req)
 
-		req.Period = game.GameData.Period
+		req.Period = g.GameData.Period
 
 		switch req.Cmd {
 		case WS_CLOCK_START:
-			go game.GameData.Clk.Start()
+			go g.GameData.Clk.Start()
 
 		case WS_CLOCK_STOP:
-		  game.GameData.Clk.Stop()
+			g.GameData.Clk.Stop()
 
 		case WS_CLOCK_RESET:
-		  game.GameData.Clk.GameClockReset()
+			g.GameData.Clk.GameClockReset()
 
 		case WS_SHOT_RESET:
-		  game.GameData.Clk.ShotClockReset()
+			g.GameData.Clk.ShotClockReset()
 
-    case WS_SHOT_STEP:
-		  game.GameData.Clk.StepShotClock(req.Step)
+		case WS_SHOT_STEP:
+			g.GameData.Clk.StepShotClock(req.Step)
 
 		case WS_CLOCK_STEP:
-		  game.GameData.Clk.StepGameClock(req.Step)
+			g.GameData.Clk.StepGameClock(req.Step)
 
 		case WS_PERIOD_UP:
-			incrementPeriod(1)
-		
+			incrementPeriod(1, &g)
+
 		case WS_PERIOD_DOWN:
-		  incrementPeriod(-1)
+			incrementPeriod(-1, &g)
 
 		case WS_POSSESSION_HOME:
-			setPossession(HOME, req.Meta["stop"].(bool))
+			setPossession(HOME, req.Meta["stop"].(bool), &g)
 
 		case WS_POSSESSION_AWAY:
-		  setPossession(AWAY, req.Meta["stop"].(bool))
+			setPossession(AWAY, req.Meta["stop"].(bool), &g)
 
 		case WS_FINAL:
-			game.Final = true
+			g.Final = true
 
 		case WS_ABORT:
+			g.GameData.Clk.Stop()
 
-			game.GameData.Clk.Stop()
-		
 		case WS_SCORE_HOME:
-      incrementPoints(HOME, req.Step)
+			incrementPoints(HOME, req.Step, &g)
 
-    case WS_SCORE_AWAY:
-      incrementPoints(AWAY, req.Step)
+		case WS_SCORE_AWAY:
+			incrementPoints(AWAY, req.Step, &g)
 
 		case WS_FOUL_HOME_UP:
-		  incrementFoul(HOME, 1)
+			incrementFoul(HOME, 1, &g)
 
 		case WS_FOUL_HOME_DOWN:
-			incrementFoul(HOME, -1)
-		
+			incrementFoul(HOME, -1, &g)
+
 		case WS_FOUL_AWAY_UP:
-		  incrementFoul(AWAY, 1)
+			incrementFoul(AWAY, 1, &g)
 
 		case WS_FOUL_AWAY_DOWN:
-			incrementFoul(AWAY, -1)
+			incrementFoul(AWAY, -1, &g)
 
 		case WS_TIMEOUT_HOME:
-			
-			if !incrementTimeout(HOME, -1) {
+
+			if !incrementTimeout(HOME, -1, &g) {
 				req.Reason = MSG_NO_TIMEOUTS
 			} else {
-				game.GameData.Clk.Stop()
+				g.GameData.Clk.Stop()
 			}
-			
+
 		case WS_TIMEOUT_HOME_CANCEL:
-			
-			if !incrementTimeout(HOME, 1) {
+
+			if !incrementTimeout(HOME, 1, &g) {
 				req.Reason = MSG_MAX_TIMEOUTS
 			}
 
 		case WS_TIMEOUT_AWAY:
-			
-			if !incrementTimeout(AWAY, -1) {
+
+			if !incrementTimeout(AWAY, -1, &g) {
 				req.Reason = MSG_NO_TIMEOUTS
 			} else {
-				game.GameData.Clk.Stop()
+				g.GameData.Clk.Stop()
 			}
 
 		case WS_TIMEOUT_AWAY_CANCEL:
-			
-			if !incrementTimeout(AWAY, 1) {
+
+			if !incrementTimeout(AWAY, 1, &g) {
 				req.Reason = MSG_MAX_TIMEOUTS
 			}
 
 		case WS_GAME_STATE:
 
+			/*
 			state := getGameState()
 
 			log.Println(state);
 			if state != nil {
 				pushState(state)
 			}
-			
-		
+			*/
+
+
 		default:
-		  log.Printf("[%s][Error] unsupported command: %s", version(), string(msg))
+			log.Printf("[%s][Error] unsupported command: %s", version(), string(msg))
 		}
 
-		put(fmt.Sprintf("%d", game.ID), game.GameData.Clk.PlayClock, req)
+		put(fmt.Sprintf("%s", ), g.GameData.Clk.PlayClock, req)
 
 	}
 

@@ -28,6 +28,7 @@ var (
   mctl io.WriteCloser
 )
 
+
 func videoPlay(options map[string]string) {
 
 	if omx != nil {
@@ -48,9 +49,9 @@ func videoPlay(options map[string]string) {
     log.Println(err)
     return
   }
-  
+
   err = omx.Start()
- 
+
 	if err != nil {
     log.Println(err)
 		return
@@ -104,27 +105,27 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 			data["video"] = "/" + *glbs.GetPath(id)
 
 			compiler := amber.New()
-	
+
 			err := compiler.ParseFile("mboard-www/video.amber")
-	
+
 			if err != nil {
-				
+
 				log.Printf("[%s][Error] %s", version(), err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
-	
+
 			}
-	
+
 			template, err2 := compiler.Compile()
-	
+
 			if err2 != nil {
-				
+
 				log.Printf("[%s][Error] %s", version(), err2)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
-	
+
 			}
-	
+
 			template.Execute(w, data)
 
 		}

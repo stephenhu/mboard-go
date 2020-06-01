@@ -8,12 +8,14 @@ import (
 	"fmt"
   "log"
 	"net/http"
-	"strconv"
+	//"strconv"
 	"strings"
 	//"sync"
 	"time"
 
+	"github.com/gorilla/mux"
 	//"github.com/gorilla/websocket"
+
 )
 
 const (
@@ -26,29 +28,7 @@ const (
 	SHOT      = "shot"
 )
 
-const (
-
-	GameCreate = "INSERT into games DEFAULT VALUES"
-
-  GameDelete = "DELETE from games WHERE id=?"
-	
-	GameGet = "SELECT " +
-	  "id, data, status, created, updated " +
-		"FROM games " +
-		"WHERE id=?"
-
-	GamesGet = "SELECT " +
-	  "id, data, status, created, updated " + 
-		"FROM games " +
-		"ORDER BY created DESC"
-
-	GameUpdate = "UPDATE games " +
-	  "SET data=?, updated=CURRENT_TIMESTAMP, status=? " +
-		"WHERE id=?"
-
-)
-
-type Config struct {
+type GameConfig struct {
   Periods			int 		`json:"periods"`
   Minutes			int 		`json:"minutes"`
 	Shot			  int 		`json:"shot"`
@@ -59,100 +39,51 @@ type Config struct {
 }
 
 type GameInfo struct {
-  Settings			*Config
+  Settings			*GameConfig
 	GameData			*Game
 	//Conns 				map[*websocket.Conn]*sync.Mutex
 	Final         bool
-	Created       string
-	ID            int64
+	Created       int64
 	Active        bool
 }
 
 //TODO: remove gamestate struct?
 type GameState struct {
-	Settings      *Config   `json:"settings"`
-	Period        int				`json:"period"`
-	Possession    bool			`json:"possession"`
-	Home          *Team			`json:"home"`
-	Away          *Team			`json:"away"`
-	GameClock     *Clock    `json:"game"`
-	ShotClock     *Clock    `json:"shot"`
-	ID            int64     `json:"id"`
+	Settings      *GameConfig   `json:"settings"`
+	Period        int						`json:"period"`
+	Possession    bool					`json:"possession"`
+	Home          *Team					`json:"home"`
+	Away          *Team					`json:"away"`
+	GameClock     *Clock    		`json:"game"`
+	ShotClock     *Clock    		`json:"shot"`
 }
 
 type GameRes struct {
 	Msg 	string 	`json:"msg"`
 }
 
-var game = &GameInfo{}
+var gameMap = map[string]GameInfo{}
 
-func parseConfig(r *http.Request) *Config {
+var fields = []string{HOME, AWAY, PERIODS, MINUTES, FOULS, TIMEOUTS, SHOT}
 
-    config := Config{
-			Periods: 		4,
-			Minutes:		1,
-			Shot:				-1,
-			Timeouts:		3,
-			Fouls:			10,
-			Home:				HOME,
-			Away:       AWAY,
+
+func gameConfig(j string) *GameConfig {
+
+    config := GameConfig{}
+
+		// TODO: check fields
+
+		err := json.Unmarshal([]byte(j), &config)
+
+		if err != nil {
+			log.Println(err)
+			return nil
+		} else {
+			return &config
 		}
 
-		fields := []string{HOME, AWAY, PERIODS, MINUTES, FOULS, TIMEOUTS, SHOT}
+} // gameConfig
 
-		for _, f := range fields {
-
-			val := r.FormValue(f)
-
-			if f == HOME {
-				// string value
-				config.Home = val
-			} else if f == AWAY {
-			  config.Away = val
-			} else {
-
-				if val == "" {
-					continue
-				}
-
-				i, err := strconv.ParseInt(val, 0, 8)
-
-				if err != nil {
-					log.Println(err)
-				} else {
-
-					// TODO: fouls and shot can equal 0
-          if i < 1 || i > 30 {
-						continue
-					}
-
-					switch f {
-					case PERIODS:
-
-					  if i == 2 || i == 4 {
-					    config.Periods = int(i)
-						}
-
-					case MINUTES:
-					  config.Minutes = int(i)
-					case FOULS:
-					  config.Fouls = int(i)
-					case TIMEOUTS:
-					  config.Timeouts = int(i)
-					case SHOT:
-						config.Shot = int(i)
-					}
-					
-				}
-
-			}
-
-		}
-
-		return &config
-
-		
-} // parseConfig
 
 func initTeam(name string, timeouts int) *Team {
 
@@ -166,7 +97,8 @@ func initTeam(name string, timeouts int) *Team {
 
 } // initTeam
 
-func initGameClocks() *GameClocks {
+
+func initGameClocks(id string) *GameClocks {
 
   gc := GameClocks{
 		ShotViolationChan: make(chan bool),
@@ -174,13 +106,15 @@ func initGameClocks() *GameClocks {
 		OutChan: make(chan []byte),
 		PlayClock: &Clock{Tenths: 0, Seconds: 0},
 		ShotClock: &Clock{Tenths: 0, Seconds: 0},
+		GameID: id,
 	}
 
 	return &gc
 
 } // initGameClocks
 
-func generateId(config *Config, length int) string {
+
+func generateId(config *GameConfig, length int) string {
 
   now := time.Now().String()
 
@@ -191,93 +125,89 @@ func generateId(config *Config, length int) string {
 	hash := hex.EncodeToString(digest.Sum(nil))
 
 	return hash[:length]
- 
+
 } // generateId
 
-func getGameState() *GameState {
-
-	if game == nil {
-		return nil
-	} else {
-		
-		state := GameState{
-			Settings: game.Settings,
-			Period: game.GameData.Period,
-			Possession: game.GameData.Possession,
-			Home: game.GameData.Home,
-			Away: game.GameData.Away,
-			GameClock: game.GameData.Clk.PlayClock,
-			ShotClock: game.GameData.Clk.ShotClock,
-			ID: game.ID,
-		}
-
-		return &state
-
-	}
-
-} // getGameState
 
 func gameHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
   case http.MethodPost:
 
-		log.Printf("[%s] POST /games", version())
-
-    config := parseConfig(r)
+		config := r.FormValue(API_PARAM_GAME_CONFIG)
 
 		log.Println(config)
-		
-		if game != nil && game.Active {
-			w.WriteHeader(http.StatusForbidden)
-			return
+
+		if config == "" {
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+
+			cf := gameConfig(config)
+
+			if cf != nil {
+
+				id := generateId(cf, 32)
+
+				h := initTeam(cf.Home, cf.Timeouts)
+				a := initTeam(cf.Away, cf.Timeouts)
+
+				c := initGameClocks(id)
+
+				ts := time.Now().Unix()
+
+				gi := GameInfo{
+					Settings:	cf,
+					GameData: &Game{
+						Home: h,
+						Away: a,
+						Clk: c,
+					},
+					Final: false,
+					Created: ts,
+					Active: true,
+				}
+
+				addGame(config, ts)
+
+				gameMap[id] = gi
+
+				pushMap(WS_SCOREBOARD, nil)
+
+				w.Write([]byte(id))
+
+			} else {
+				w.WriteHeader(http.StatusBadRequest)
+			}
+
 		}
-
-		id := addGame()
-
-		if id == -1 {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		h := initTeam(config.Home, config.Timeouts)
-		a := initTeam(config.Away, config.Timeouts)
-
-		c := initGameClocks()
-
-    gi := GameInfo{
-			Settings:	config,
-			GameData: &Game{
-				Home: h,
-				Away: a,
-				Clk: c,
-			},
-			//Conns: make(map[*websocket.Conn]*sync.Mutex),
-			Final: false,
-			Created: time.Now().String(),
-			ID: id,
-			Active: true,
-		}
-
-		game = &gi
-
-		pushMap(WS_SCOREBOARD, nil)
 
 	case http.MethodGet:
 
-		if game == nil {
-			w.WriteHeader(http.StatusNotFound)
-		} else if game.Active {
+		m := mux.Vars(r)
+
+		id := m["id"]
+
+		if id == "" {
+
+			// getGames()
+			// TODO: get all games
+			//w.WriteHeader(http.StatusNotFound)
+		} else {
+
+			//gr := getGameRecord(id)
+
+			g, ok := gameMap[id]
+
+			if ok {
 
 				gs := GameState{
-					Settings: game.Settings,
-					Period: game.GameData.Period,
-					Possession: game.GameData.Possession,
-					Home: game.GameData.Home,
-					Away: game.GameData.Away,
-					GameClock: game.GameData.Clk.PlayClock,
-					ShotClock: game.GameData.Clk.ShotClock,
-					ID: game.ID,
+					Settings: g.Settings,
+					Period: g.GameData.Period,
+					Possession: g.GameData.Possession,
+					Home: g.GameData.Home,
+					Away: g.GameData.Away,
+					GameClock: g.GameData.Clk.PlayClock,
+					ShotClock: g.GameData.Clk.ShotClock,
 				}
 
 				j, jsonErr := json.Marshal(gs)
@@ -288,22 +218,36 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 
 				w.Write(j)
 
-		} else {
-			w.WriteHeader(http.StatusNotFound)
+			} else {
+				w.WriteHeader(http.StatusNotFound)
+			}
+
 		}
 
 	case http.MethodPut:
-	 
-	  if game.Active {
 
-			game.Active = false
-			game.Final 	= true
+		m := mux.Vars(r)
 
+		id := m["id"]
+
+		g, ok := gameMap[id]
+
+	  if ok && g.Active {
+
+			g.Active = false
+			g.Final 	= true
+/*
+			gr := GameRecord{}
+
+			gr.
+			/*
 			gr := GameRecord{
-				Home: game.GameData.Home,
-				Away: game.GameData.Away,
+				Home: g.GameData.Home,
+				Away: g.GameData.Away,
 			}
+			*/
 
+/*
 			j, jsonErr := json.Marshal(gr)
 
 			if jsonErr != nil {
@@ -311,22 +255,22 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			} else {
 
-				updateGame(game.ID, string(j))
+				updateGame(g.ID, string(j))
 
-				game.GameData.Clk.Stop()
+				g.GameData.Clk.Stop()
 
 				pushString(WS_FINAL, "")
 
-				game = &GameInfo{}
+				g = &GameInfo{}
 
 				pushMap(WS_SETUP, nil)
 
 				w.WriteHeader(http.StatusOK)
 
 			}
-
+*/
 		} else {
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusNotFound)
 		}
 
 	case http.MethodDelete:

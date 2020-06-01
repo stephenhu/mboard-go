@@ -7,6 +7,7 @@ import (
 	"github.com/eknkc/amber"
 )
 
+
 func scoreboardHandler(w http.ResponseWriter, r *http.Request) {
 
   switch r.Method {
@@ -17,7 +18,7 @@ func scoreboardHandler(w http.ResponseWriter, r *http.Request) {
 		err := compiler.ParseFile("mboard-www/scoreboard.amber")
 
 		if err != nil {
-			
+
 			log.Printf("[%s][Error] %s", version(), err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -27,7 +28,7 @@ func scoreboardHandler(w http.ResponseWriter, r *http.Request) {
 		template, err2 := compiler.Compile()
 
 		if err2 != nil {
-			
+
 			log.Printf("[%s][Error] %s", version(), err2)
 			w.WriteHeader(http.StatusInternalServerError)
 			return

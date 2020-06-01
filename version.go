@@ -13,7 +13,7 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
   case http.MethodGet:
 
 		v := map[string]string{
-			"version": VERSION,
+			"version": APP_VERSION,
 		}
 
 		j, jsonErr := json.Marshal(v)
@@ -25,7 +25,7 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(j)
 		}
 
-		 
+
   case http.MethodPost:
   case http.MethodDelete:
 	case http.MethodPut:

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -29,7 +30,24 @@ type ManagerCommand struct {
 	Options		map[string]string			`json:"options"`
 }
 
+
 func managerHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+
+	id := vars["id"]
+
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	g, ok := gameMap[id]
+
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
   upgrader := websocket.Upgrader {
 		ReadBufferSize:		1024,
@@ -40,7 +58,7 @@ func managerHandler(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
-		
+
 		log.Println("[Error]", err)
 		return
 
@@ -51,7 +69,7 @@ func managerHandler(w http.ResponseWriter, r *http.Request) {
 	defer c.Close()
 
 	for {
-   
+
 		_, msg, err := c.ReadMessage()
 
 		if err != nil {
@@ -79,7 +97,7 @@ func managerHandler(w http.ResponseWriter, r *http.Request) {
 
 		case WS_SCOREBOARD:
 
-			if game != nil && game.Active {
+			if g.Active {
 				pushMap(WS_SCOREBOARD, mc.Options)
 			} else {
 				pushMap(WS_SETUP, mc.Options)

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -26,10 +27,11 @@ type SubscriberStateResponse struct {
 
 var subscribers map[*websocket.Conn] *sync.Mutex
 
+
 func sendToSubscribers(j []byte) {
 
 	for c, mu := range subscribers {
-		
+
 		mu.Lock()
 		c.WriteMessage(websocket.TextMessage, j)
 		mu.Unlock()
@@ -37,6 +39,7 @@ func sendToSubscribers(j []byte) {
 	}
 
 } // sendToSubscribers
+
 
 func pushState(state *GameState) {
 
@@ -55,6 +58,7 @@ func pushState(state *GameState) {
 
 } // pushState
 
+
 func pushString(key string, val string) {
 
 	n := SubscriberStringResponse{
@@ -71,6 +75,7 @@ func pushString(key string, val string) {
 	sendToSubscribers(j)
 
 } // pushString
+
 
 func pushMap(msg string, options map[string] string) {
 
@@ -90,7 +95,19 @@ func pushMap(msg string, options map[string] string) {
 
 } // pushMap
 
+
 func subscriberHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+
+	id := vars["id"]
+
+	_, ok := gameMap[id]
+
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
   upgrader := websocket.Upgrader {
 		ReadBufferSize:		1024,
@@ -101,7 +118,7 @@ func subscriberHandler(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
-		
+
 		log.Println("[Error]", err)
 		return
 
@@ -116,7 +133,7 @@ func subscriberHandler(w http.ResponseWriter, r *http.Request) {
 	subscribers[c] = &sync.Mutex{}
 
 	for {
-   
+
 		_, msg, err := c.ReadMessage()
 
 		if err != nil {
@@ -137,8 +154,8 @@ func subscriberHandler(w http.ResponseWriter, r *http.Request) {
     if msg == nil {
 			log.Println(msg)
 			break
-		}		
+		}
 
 	}
-	
+
 } // subscriberHandler

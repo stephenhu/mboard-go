@@ -13,7 +13,7 @@ func detailsHandler(w http.ResponseWriter, r *http.Request) {
   case http.MethodGet:
 
 		v := map[string]string{
-			"version": VERSION,
+			"version": APP_VERSION,
 			"uptime": "",
 			"capacity": "",
 		}
@@ -27,7 +27,7 @@ func detailsHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(j)
 		}
 
-		 
+
   case http.MethodPost:
   case http.MethodDelete:
 	case http.MethodPut:

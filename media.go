@@ -39,14 +39,14 @@ const (
 	  "VALUES($1, $2, $3)"
 
   MediaDelete = "DELETE from media WHERE id=?"
-	
+
 	MediaGet = "SELECT " +
 	  "id, game_id, key, meta, tags, created, updated " +
 		"FROM media " +
 		"WHERE id=?"
 
 	MediaGetAll = "SELECT " +
-	  "id, game_id, key, meta, tags, created, updated " + 
+	  "id, game_id, key, meta, tags, created, updated " +
 		"FROM media " +
 		"ORDER BY created DESC"
 
@@ -86,7 +86,7 @@ func findExt(exts []string, target string) bool {
 } // findExt
 
 func getTag(ext string) string {
-	
+
 	if findExt(SUPPORTED_VIDEO, ext) {
 		return MEDIA_VIDEO
 	} else if findExt(SUPPORTED_AUDIO, ext) {
@@ -108,11 +108,12 @@ func getMeta(filename string, size int64) (*MediaMeta, error) {
 	m.Ext		= filepath.Ext(filename)
 
 	return &m, nil
-	
+
 } // getMeta
 
 func createMedia(key string, filename string, size int64) {
 
+	/*
 	meta, err := getMeta(filename, size)
 
 	if err != nil {
@@ -126,18 +127,19 @@ func createMedia(key string, filename string, size int64) {
 		if err != nil {
 			log.Println(err)
 		} else {
-	
+
 			_, err := data.Exec(
 				MediaCreate, key, j, tag,
 			)
-		
+
 			if err != nil {
 				log.Println(err)
 			}
-		
+
 		}
 
 	}
+	*/
 
 } // createMedia
 
@@ -148,9 +150,9 @@ func removeMedia() {
 
 
 func getMediaList() []Media {
-
+/*
 	rows, err := data.Query(MediaGetAll)
-	
+
 	if err != nil {
 
 		log.Println("getMediaList(): ", err)
@@ -172,7 +174,7 @@ func getMediaList() []Media {
 			&m.Updated)
 
 		if err == sql.ErrNoRows || err != nil {
-			
+
 			log.Println("getMediaList(): ", err)
 			return nil
 
@@ -187,15 +189,17 @@ func getMediaList() []Media {
 		} else {
 
 			m.Meta = &mm
-	
+
 			all = append(all, m)
-	
+
 		}
 
 
 	}
 
 	return all
+*/
+	return nil
 
 } // getMediaList
 
@@ -238,7 +242,7 @@ func mediaHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case http.MethodGet:
-		
+
 		// search database for all media
 
 		all := getMediaList()
@@ -251,7 +255,7 @@ func mediaHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			w.Write(j)
 		}
-		
+
   case http.MethodDelete:
 	case http.MethodPut:
 	default:

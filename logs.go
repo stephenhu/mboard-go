@@ -1,37 +1,29 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/mux"
+
 )
 
 type Log struct {
-	ID          string  `json:"id"`
 	Clock       string  `json:"clock"`
+	Period      string  `json:"period"`
 	Msg					string	`json:"msg"`
 	Created			string	`json:"created"`
 	Updated			string	`json:"updated"`
 }
 
-const (
 
-	LogCreate = "INSERT into logs" +
-	  "(game_id, clock, msg) " + 
-		"VALUES ($1, $2, $3)"
-	
-	LogGet = "SELECT " +
-	  "id, clock, msg, created, updated " +
-		"FROM logs " + 
-		"WHERE game_id=? ORDER BY created DESC"
+func logKey(id string) string {
+  return fmt.Sprintf("%s.logs", id)
+} // logKey
 
-  LogDelete = "DELETE from logs WHERE id=?"
-
-)
 
 func gameTime(clk *Clock) string {
 
@@ -41,8 +33,6 @@ func gameTime(clk *Clock) string {
 	if clk.Seconds != 0 {
 		m = clk.Seconds/60
 		s = clk.Seconds%60
-		log.Println(m)
-		log.Println(s)
 	}
 
 	if m < 10 {
@@ -69,81 +59,69 @@ func gameTime(clk *Clock) string {
 
 } // gameTime
 
-func put(game_id string, clk *Clock, req Req) {
 
-  j, errJson := json.Marshal(req)
+func put(id string, clk *Clock, req Req) {
 
-	if errJson != nil {
-		log.Println(errJson)
-		return
+	l := Log{
+		Clock: gameTime(clk),
+		Period: fmt.Sprintf("%d", req.Period),
+		Msg: req.Cmd,
 	}
 
-  _, err := data.Exec(
-		LogCreate, game_id, gameTime(clk), j,
-	)
+  j, err := json.Marshal(l)
 
 	if err != nil {
-		
-		log.Printf("[%s][Error] %s", version(), err)
+		log.Println(err)
 		return
+	} else {
+
+		rp := Red.Get()
+
+		_, err := rp.Do(LPUSH, logKey(id), string(j))
+
+		if err != nil {
+			log.Println(err)
+		}
 
 	}
 
 } // put
 
-func get(game_id string) []Log {
 
-	rows, err := data.Query(
-		LogGet, game_id,
-	)
+func get(id string) []string {
+
+	rp := Red.Get()
+
+	logs, err := redis.Strings(rp.Do(LRANGE, logKey(id), 0, -1))
 
 	if err != nil {
-
-		log.Printf("[%s][Error] %s", version(), err)
+		log.Println(err)
 		return nil
-
+	} else {
+		return logs
 	}
-
-	defer rows.Close()
-
-	logs := []Log{}
-
-	for rows.Next() {
-
-		l := Log{}
-
-		err := rows.Scan(&l.ID, &l.Clock, &l.Msg, &l.Created, &l.Updated)
-
-		if err == sql.ErrNoRows || err != nil {
-			
-			log.Printf("[%s][Error] %s", version(), err)
-			return nil
-
-		}
-
-		logs = append(logs, l)
-
-	}
-
-	return logs
 
 } // get
 
+
 func del(log_id string) bool {
 
+	/*
   _, err := data.Exec(
 		LogDelete, log_id,
 	)
 
 	if err != nil {
-		
+
 		log.Printf("[%s][Error] %s", version(), err)
 		return false
 
 	}
 
 	return true
+	*/
 
+	return false
 } // delete
 
 
