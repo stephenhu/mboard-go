@@ -1,10 +1,11 @@
 FROM golang AS builder
-WORKDIR /work/src/github.com/stephenhu/mboard-go
+WORKDIR /go/netc
 COPY . .
-RUN go get && CGO_ENABLED=0 GOOS=linux go build
+RUN GOOS=linux GOARCH=amd64 go get && go build
 
-FROM scratch
-WORKDIR /usr/local/mboard-go
-COPY --from=builder /work/src/github.com/stephenhu/mboard-go/mboard-go .
+FROM ubuntu
+WORKDIR /usr/local/mboard
+RUN apt-get update -y
+COPY --from=builder /go/netc/mboard-go .
 EXPOSE 8000
-CMD ["/usr/local/mboard-go/mboard-go"]
+CMD ["/usr/local/mboard/mboard-go"]

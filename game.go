@@ -192,6 +192,15 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 			// getGames()
 			// TODO: get all games
 			//w.WriteHeader(http.StatusNotFound)
+
+			j, err := json.Marshal(gameMap)
+
+			if err != nil {
+				log.Println(err)
+			} else {
+				w.Write(j)
+			}
+
 		} else {
 
 			//gr := getGameRecord(id)
