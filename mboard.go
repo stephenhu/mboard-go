@@ -7,6 +7,8 @@ const (
 	TEST_ADDRESS 	    = "127.0.0.1:8000"
 	CLOUD_ADDRESS     = "madsportslab.com"
 	MBOARD            = "mboard"
+	MBOARD_WWW        = "www"
+	QR_FILE						= "qr.png"
 )
 
 const (

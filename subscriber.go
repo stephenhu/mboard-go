@@ -25,23 +25,31 @@ type SubscriberStateResponse struct {
 	State     *GameState    `json:"state"`
 }
 
-var subscribers map[*websocket.Conn] *sync.Mutex
+//var subscribers map[*websocket.Conn] *sync.Mutex
+
+var subscribers map[string]map[*websocket.Conn] *sync.Mutex
 
 
-func sendToSubscribers(j []byte) {
+func sendToSubscribers(id string, j []byte) {
 
-	for c, mu := range subscribers {
+	s, ok := subscribers[id]
 
-		mu.Lock()
-		c.WriteMessage(websocket.TextMessage, j)
-		mu.Unlock()
+	if ok {
+
+		for c, mu := range s {
+
+			mu.Lock()
+			c.WriteMessage(websocket.TextMessage, j)
+			mu.Unlock()
+
+		}
 
 	}
 
 } // sendToSubscribers
 
 
-func pushState(state *GameState) {
+func pushState(id string, state *GameState) {
 
 	n := SubscriberStateResponse{
 		Key: WS_GAME_STATE,
@@ -54,12 +62,12 @@ func pushState(state *GameState) {
 		log.Println(err)
 	}
 
-	sendToSubscribers(j)
+	sendToSubscribers(id,  j)
 
 } // pushState
 
 
-func pushString(key string, val string) {
+func pushString(id string, key string, val string) {
 
 	n := SubscriberStringResponse{
 		Key: key,
@@ -72,12 +80,12 @@ func pushString(key string, val string) {
 		log.Println(err)
 	}
 
-	sendToSubscribers(j)
+	sendToSubscribers(id, j)
 
 } // pushString
 
 
-func pushMap(msg string, options map[string] string) {
+func pushMap(id string, msg string, options map[string] string) {
 
 	r := SubscriberMapResponse{
 		Page: msg,
@@ -91,7 +99,7 @@ func pushMap(msg string, options map[string] string) {
 		return
 	}
 
-	sendToSubscribers(j)
+	sendToSubscribers(id, j)
 
 } // pushMap
 
@@ -107,53 +115,58 @@ func subscriberHandler(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
-	}
+	} else {
 
-  upgrader := websocket.Upgrader {
-		ReadBufferSize:		1024,
-		WriteBufferSize: 	1024,
-		CheckOrigin:		func(r *http.Request) bool { return true },
-	}
+		upgrader := websocket.Upgrader {
+			ReadBufferSize:		1024,
+			WriteBufferSize: 	1024,
+			CheckOrigin:		func(r *http.Request) bool { return true },
+		}
 
-	c, err := upgrader.Upgrade(w, r, nil)
-
-	if err != nil {
-
-		log.Println("[Error]", err)
-		return
-
-	}
-
-	defer c.Close()
-
-	if subscribers == nil {
-		subscribers = make(map[*websocket.Conn]*sync.Mutex)
-	}
-
-	subscribers[c] = &sync.Mutex{}
-
-	for {
-
-		_, msg, err := c.ReadMessage()
+		c, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
 
-			log.Println("[Error] ", err)
-
-			if websocket.IsUnexpectedCloseError(err) {
-
-				//log.Println("Removing connection: ", c)
-				delete(subscribers, c)
-
-			}
-
-			break
+			log.Println("[Error]", err)
+			return
 
 		}
 
-    if msg == nil {
-			log.Println(msg)
-			break
+		defer c.Close()
+
+		if subscribers == nil {
+			subscribers = make(map[string]map[*websocket.Conn]*sync.Mutex)
+		}
+
+		_, ok := subscribers[id]
+
+		if !ok {
+			subscribers[id] = make(map[*websocket.Conn]*sync.Mutex)
+		}
+
+		subscribers[id][c] = &sync.Mutex{}
+
+		for {
+
+			_, msg, err := c.ReadMessage()
+
+			if err != nil {
+
+				log.Println("[Error] ", err)
+
+				if websocket.IsUnexpectedCloseError(err) {
+					delete(subscribers[id], c)
+				}
+
+				break
+
+			}
+
+			if msg == nil {
+				log.Println(msg)
+				break
+			}
+
 		}
 
 	}

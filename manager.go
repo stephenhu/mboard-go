@@ -90,7 +90,7 @@ func managerHandler(w http.ResponseWriter, r *http.Request) {
 
 		switch mc.Cmd {
 		case WS_LOGO:
-			pushMap(WS_LOGO, mc.Options)
+			pushMap(id, WS_LOGO, mc.Options)
 
 		case WS_LOGIN:
 			log.Println(WS_LOGIN)
@@ -98,19 +98,19 @@ func managerHandler(w http.ResponseWriter, r *http.Request) {
 		case WS_SCOREBOARD:
 
 			if g.Active {
-				pushMap(WS_SCOREBOARD, mc.Options)
+				pushMap(id, WS_SCOREBOARD, mc.Options)
 			} else {
-				pushMap(WS_SETUP, mc.Options)
+				pushMap(id, WS_SETUP, mc.Options)
 			}
 
 		case WS_ADVERTISEMENT:
-			pushMap(WS_ADVERTISEMENT, mc.Options)
+			pushMap(id, WS_ADVERTISEMENT, mc.Options)
 
 		case WS_VIDEO_PLAY:
 
 			go videoPlay(mc.Options)
 
-			//pushMap(WS_VIDEO_PLAY, mc.Options)
+			//pushMap(id, WS_VIDEO_PLAY, mc.Options)
 
 		case WS_VIDEO_STOP:
 
@@ -120,19 +120,19 @@ func managerHandler(w http.ResponseWriter, r *http.Request) {
 				log.Println(err)
 			}
 
-			//pushMap(WS_VIDEO_STOP, mc.Options)
+			//pushMap(id, WS_VIDEO_STOP, mc.Options)
 
 		case WS_AUDIO_PLAY:
-			pushMap(WS_AUDIO_PLAY, mc.Options)
+			pushMap(id, WS_AUDIO_PLAY, mc.Options)
 
 		case WS_AUDIO_STOP:
-			pushMap(WS_AUDIO_STOP, mc.Options)
+			pushMap(id, WS_AUDIO_STOP, mc.Options)
 
 		case WS_PHOTO_PLAY:
-			pushMap(WS_PHOTO_PLAY, mc.Options)
+			pushMap(id, WS_PHOTO_PLAY, mc.Options)
 
 		case WS_PHOTO_STOP:
-			pushMap(WS_PHOTO_STOP, mc.Options)
+			pushMap(id, WS_PHOTO_STOP, mc.Options)
 
 		default:
 			log.Println("unknown")

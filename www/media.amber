@@ -1,0 +1,40 @@
+extends layout
+
+block content
+  div.container-fluid
+    div.row.mt-3
+      div.col-xl-12
+        div.btn-group.btn-group-toggle
+          a.btn.btn-outline-info.rounded[href="/home"]
+            span.fas.fa-home.fa-5x.m-3
+          label.btn.btn-outline-info.ml-2.rounded.active
+            span.fas.fa-photo-video.fa-5x.m-3
+          a.btn.btn-outline-info.ml-2.rounded[href="/ads"]
+            span.fas.fa-ad.fa-5x.m-3
+          a.btn.btn-outline-info.ml-2.rounded[href="/monitor"]
+            span.fas.fa-chart-pie.fa-5x.m-3
+          a.btn.btn-outline-info.ml-2.rounded[href="/settings"]
+            span.fas.fa-cog.fa-5x.m-3
+        a.btn.btn-success.float-right[href=""]
+          span.fas.fa-basketball-ball.fa-5x.m-2
+    div.row.mt-5
+      div.col-xl-12
+        div.card-group
+          div.card.bg-dark
+            div.card-header
+              i.fas.fa-basketball-ball
+            div.card-body
+              div.card-title Bulls 36 - Lakers 39
+              div.card-subtitle 2nd, 8:33
+              div.card-text 14 straight points from the Lakers.
+            div.card-footer
+              small.text-muted 3s
+          div.card.bg-dark
+            div.card-header
+              i.fab.fa-facebook
+            div.card-body
+              div.card-title Celtics 104 - Pistons 109
+              div.card-subtitle Final
+              div.card-text
+            div.card-footer
+              small.text-muted 5h

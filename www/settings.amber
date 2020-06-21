@@ -1,0 +1,77 @@
+extends layout
+
+block content
+  div.container-fluid
+    div.row.mt-3
+      div.col-xl-12
+        div.btn-group.btn-group-toggle
+          a.btn.btn-outline-info.rounded[href="/home"]
+            span.fas.fa-home.fa-5x.m-2
+          a.btn.btn-outline-info.ml-2.rounded[href="/media"]
+            span.fas.fa-photo-video.fa-5x.m-2
+          a.btn.btn-outline-info.ml-2.rounded[href="/ads"]
+            span.fas.fa-ad.fa-5x.m-2
+          a.btn.btn-outline-info.ml-2.rounded[href="/monitor"]
+            span.fas.fa-chart-pie.fa-5x.m-2
+          label.btn.btn-outline-info.ml-2.rounded.active
+            span.fas.fa-cog.fa-5x.m-2
+        a.btn.btn-success.float-right[href=""]
+          span.fas.fa-basketball-ball.fa-5x.m-2
+    div.row.mt-5
+      div.col-xl-12
+        div.card-group
+          div.card.bg-dark
+            div.card-header Network
+            div.card-body
+              div.card-title.h5
+                span.fas.fa-network-wired &nbsp; &nbsp; Wired
+              div.card-subtitle.text-info.h6 10.10.0.1
+                a[href=""]
+                  span.fas.fa-wrench.text-info.ml-3
+            div.card-body
+              div.card-title.h5
+                span.fas.fa-wifi &nbsp; &nbsp; Wireless
+              div.card-subtitle.text-info.h6 10.45.0.1
+                a[href=""]
+                  span.fas.fa-wrench.text-info.ml-3
+            div.card-body
+              div.card-title.h5 SSID
+              div.card-subtitle.textinfo.h6 mboard
+                a[href=""]
+                  span.fas.fa-wrench.text-info.ml-3
+            div.card-footer
+              small.text-muted 3s
+          div.card.bg-dark.ml-2
+            div.card-header User interface
+            div.card-body
+              div.card-title.h5 Themes
+              div.card-subtitle.h6
+              div.mt-1.btn-group.btn-group-toggle
+                label.rounded.mr-2.btn.btn-outline-info.active Default
+                  input[type="radio"][checked]
+                label.rounded.mr-2.btn.btn-outline-info Dark
+                  input[type="radio"]
+                label.rounded.mr-2.btn.btn-outline-info Future
+                  input[type="radio"]
+                label.rounded.mr-2.btn.btn-outline-info Light
+                  input[type="radio"]
+            div.card-footer
+              small.text-muted 5h
+          div.card.bg-dark.ml-2
+            div.card-header Device
+            div.card-body
+              div.card-title.h5 Operations
+              button.btn.btn-outline-danger
+                span.fas.fa-redo
+              button.btn.btn-outline-warning
+                span.fas.fa-power-off
+            div.card-footer
+              small.text-muted 5h
+          div.card.bg-dark.ml-2
+            div.card-header Updates
+            div.card-body
+              div.card-title.h5 Version
+              div.card-subtitle.h6 1.0.6
+              button.btn.btn-outline-success.mt-3 Check for updates
+            div.card-footer
+              small.text-muted 5h

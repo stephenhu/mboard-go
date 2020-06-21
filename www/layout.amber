@@ -1,0 +1,13 @@
+doctype 5
+html[lang="en"]
+  head
+    meta[charset="utf-8"]
+    meta(name="description"][content="intelligent scoreboard"]
+    title mboard - intelligent scoreboard
+    link[rel="stylesheet"][href="/www/bootstrap/css/bootstrap.min.css"]
+    link[rel="stylesheet"][href="/www/fontawesome/css/fontawesome.min.css"]
+    link[rel="stylesheet"][href="/www/fontawesome/css/all.min.css"]
+    link[rel="stylesheet"][href="/www/css/mboard.css"]
+    script[src="/www/js/mboard.js"]
+  body
+    block content

@@ -3,7 +3,6 @@ mboard-go
 jquery
 db/mboard.db
 data/mboard.db
-qr.png
 test.log
 data
 blobs
@@ -11,3 +10,6 @@ blobs
 secrets/config.json
 deploy/secrets/config.json
 client/bootstrap
+www/bootstrap
+www/fontawesome
+www/qr.png

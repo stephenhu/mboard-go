@@ -1,0 +1,97 @@
+/* mboard.css */
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: -webkit-linear-gradient(top, #204060, #132639);
+  color: #ffffff;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* custom classes */
+
+.hella-big {
+  font-size: 64em;
+}
+
+.massive-big {
+  font-size: 48em;
+}
+
+.too-big {
+  font-size: 32em;
+}
+
+.extra-big {
+  font-size: 24em;
+}
+
+.middle-big {
+  font-size: 18em;
+}
+
+.big {
+  font-size: 12em;
+}
+
+.medium {
+  font-size: 8em;
+}
+
+.regular {
+  font-size: 5em;
+}
+
+/* colors */
+
+.red {
+  color: #dd0000;
+}
+
+.green {
+  color: #00dd00;
+}
+
+.light-blue {
+  color: #0096fa;
+}
+
+.shade {
+  background: #19334c;
+  border-radius: 5px;
+}
+
+/* bootstrap overrides */
+
+.container {
+  background: -webkit-linear-gradient(top,#204060, #132639);
+  color: #ffffff;
+}
+
+.jumbotron {
+  background: -webkit-linear-gradient(top, #204060, #132639);
+  color: #ffffff;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  text-decoration: none;
+  font-weight: 400;
+}

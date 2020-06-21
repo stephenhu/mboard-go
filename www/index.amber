@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  div.container-fluid.m-5
+    div.row
+      div.col-xl-6
+        h1.extra-big.text-info mboard
+        h1.medium ai powered scoreboard
+        h2.text-muted madsportlsab
+      div.col-xl-6
+        img[src="www/qr.png"][size="1024"]

@@ -1,13 +1,23 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"log"
 	"net/http"
-	//"strings"
+	"strings"
 
 	"github.com/eknkc/amber"
 )
+
+var PageIndex = map[string]string {
+	"": 					"index.amber",
+	"ads":   			"ads.amber",
+	"home": 			"home.amber",
+	"media":   "media.amber",
+	"monitor":   "monitor.amber",
+	"setup": 			"setup.amber",
+	"settings":   "settings.amber",
+}
 
 
 func pageHandler(w http.ResponseWriter, r *http.Request) {
@@ -17,29 +27,40 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 
 		compiler := amber.New()
 
-		//resource := strings.Trim(r.URL.Path, "/")
+		p := strings.Trim(r.URL.Path, "/")
 
-		err := compiler.ParseFile("client/index.amber")
+		log.Println(PageIndex[p])
 
-		if err != nil {
+		page, ok := PageIndex[p]
 
-			log.Printf("[%s][Error] %s", version(), err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+		if !ok {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+
+			err := compiler.ParseFile(fmt.Sprintf("%s/%s", MBOARD_WWW, page))
+
+			if err != nil {
+
+				log.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+
+			} else {
+
+				template, err := compiler.Compile()
+
+				if err != nil {
+
+					log.Println(err)
+					w.WriteHeader(http.StatusInternalServerError)
+
+				} else {
+					template.Execute(w, nil)
+				}
+
+			}
 
 		}
-
-		template, err2 := compiler.Compile()
-
-		if err2 != nil {
-
-			log.Printf("[%s][Error] %s", version(), err2)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-
-		}
-
-		template.Execute(w, nil)
 
 	case http.MethodPost:
   case http.MethodDelete:

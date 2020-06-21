@@ -46,8 +46,8 @@ func initRouter() *mux.Router {
 
   router := mux.NewRouter()
 
-  router.PathPrefix("/client/").Handler(http.StripPrefix("/client/",
-		http.FileServer(http.Dir("./client"))))
+  router.PathPrefix("/www/").Handler(http.StripPrefix("/www/",
+		http.FileServer(http.Dir("./www"))))
 
 	router.PathPrefix("/blobs/").Handler(http.StripPrefix("/blobs/",
 		http.FileServer(http.Dir("./blobs"))))
@@ -66,7 +66,11 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/api/mgmt/details", detailsHandler)
 	router.HandleFunc("/api/mgmt/machine", machineHandler)
 
-	router.HandleFunc("/client", pageHandler)
+	router.HandleFunc("/", pageHandler)
+
+	for k, _ := range PageIndex {
+		router.HandleFunc(fmt.Sprintf("/%s", k), pageHandler)
+	}
 
 	/*
 	router.HandleFunc("/clock", pageHandler)
@@ -78,7 +82,7 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/photo", photoHandler)
 	router.HandleFunc("/advertisement", pageHandler)
 	router.HandleFunc("/download", pageHandler)
-	 */
+	*/
 
 	router.HandleFunc("/ws/games/{id:[0-9a-f]+}", controlHandler)
 	//router.HandleFunc("/ws/game", controlHandler)
@@ -100,7 +104,8 @@ func generateQR() {
 		log.Fatal(err)
 	} else {
 
-		err := qrcode.WriteFile(ip, qrcode.Medium, 1024, "mboard-www/qr.png")
+		err := qrcode.WriteFile(fmt.Sprintf("%s/home", ip), qrcode.Medium,
+		  1024, fmt.Sprintf("%s/%s", MBOARD_WWW, QR_FILE))
 
 		if err != nil {
 			log.Println(err)
@@ -117,7 +122,7 @@ func main() {
 
 	appConfig()
 
-	//generateQR()
+	generateQR()
 
 	connectRedis()
 

@@ -172,7 +172,7 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 
 				gameMap[id] = gi
 
-				pushMap(WS_SCOREBOARD, nil)
+				pushMap(id, WS_SCOREBOARD, nil)
 
 				w.Write([]byte(id))
 
