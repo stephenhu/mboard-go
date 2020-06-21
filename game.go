@@ -29,6 +29,7 @@ const (
 )
 
 type GameConfig struct {
+	Sport       string  `json:"sport"`
   Periods			int 		`json:"periods"`
   Minutes			int 		`json:"minutes"`
 	Shot			  int 		`json:"shot"`
@@ -189,11 +190,15 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 
 		if id == "" {
 
-			// getGames()
-			// TODO: get all games
-			//w.WriteHeader(http.StatusNotFound)
+			games := map[string]string{}
 
-			j, err := json.Marshal(gameMap)
+			for k, v := range gameMap {
+				games[k] = v.Settings.Sport
+			}
+
+			log.Println(games)
+
+			j, err := json.Marshal(games)
 
 			if err != nil {
 				log.Println(err)

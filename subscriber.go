@@ -48,10 +48,10 @@ func pushState(state *GameState) {
 		State: state,
 	}
 
-	j, jsonErr := json.Marshal(n)
+	j, err := json.Marshal(n)
 
-	if jsonErr != nil {
-		log.Println(jsonErr)
+	if err != nil {
+		log.Println(err)
 	}
 
 	sendToSubscribers(j)
@@ -66,10 +66,10 @@ func pushString(key string, val string) {
 		Val: val,
 	}
 
-	j, jsonErr := json.Marshal(n)
+	j, err := json.Marshal(n)
 
-	if jsonErr != nil {
-		log.Println(jsonErr)
+	if err != nil {
+		log.Println(err)
 	}
 
 	sendToSubscribers(j)

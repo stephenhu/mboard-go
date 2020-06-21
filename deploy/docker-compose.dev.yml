@@ -8,8 +8,8 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.traefik.address=:8080"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.traefik.address=:8080"
       - "--log.level=WARN"
     restart: unless-stopped
     ports:
@@ -21,17 +21,29 @@ services:
     image: "redis"
     restart: "unless-stopped"
     volumes:
-      - "redata:/data"
-  mboard-go:
+    - "redisdata:/data"
+  mboard:
     image: "mboard-go"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nbaddev.rule=PathPrefix(`/`, `/api`, `/ws`, `/blobs`)"
-      - "traefik.http.routers.nbaddev.entrypoints=web"
+      - "traefik.http.routers.mboard.rule=PathPrefix(`/api`, `/ws`)"
+      - "traefik.http.routers.mboard.entrypoints=web"
     restart: "unless-stopped"
     volumes:
       - "./secrets:/run/secrets"
     depends_on:
       - "redis"
+  mboard-react-dev:
+    image: "mboard-react-dev"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mboard-react-dev.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.mboard-react-dev.entrypoints=web"
+    restart: "unless-stopped"
+    stdin_open: true
+    volumes:
+      - "${MBOARD_REACT_DIR}:/app"
+    depends_on:
+      - "mboard"
 volumes:
-  redata: {}
+  redisdata: {}

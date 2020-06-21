@@ -9,4 +9,5 @@ data
 blobs
 *.gz
 secrets/config.json
+deploy/secrets/config.json
 client/bootstrap

@@ -273,13 +273,13 @@ func setPossession(name string, stopClock bool, g *GameInfo) {
 
 		g.GameData.Possession = true
 
-		pushString(WS_RET_POSSESSION_HOME, fmt.Sprintf("%b", stopClock))
+		pushString(WS_RET_POSSESSION_HOME, fmt.Sprintf("%t", stopClock))
 
 	} else if name == AWAY {
 
 		g.GameData.Possession = false
 
-		pushString(WS_RET_POSSESSION_AWAY, fmt.Sprintf("%b", stopClock))
+		pushString(WS_RET_POSSESSION_AWAY, fmt.Sprintf("%t", stopClock))
 
 	} else {
 		log.Println("Error: setPossession(), invalid possession string.")
@@ -395,8 +395,7 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 
 		}
 
-		if msg == nil {
-			log.Println(msg)
+		if msg == nil || len(msg) == 0 {
 			break
 		}
 
@@ -493,15 +492,19 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 
 		case WS_GAME_STATE:
 
-			/*
-			state := getGameState()
+			log.Println(g)
 
-			log.Println(state);
-			if state != nil {
-				pushState(state)
+			gs := GameState{
+				Settings: g.Settings,
+				Period: g.GameData.Period,
+				Possession: g.GameData.Possession,
+				Home: g.GameData.Home,
+				Away: g.GameData.Away,
+				GameClock: g.GameData.Clk.PlayClock,
+				ShotClock: g.GameData.Clk.ShotClock,
 			}
-			*/
 
+			pushState(&gs)
 
 		default:
 			log.Printf("[%s][Error] unsupported command: %s", version(), string(msg))
