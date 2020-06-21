@@ -6,15 +6,15 @@ block content
       div.col-xl-12
         div.btn-group.btn-group-toggle
           a.btn.btn-outline-info.rounded[href="/home"]
-            span.fas.fa-home.fa-5x.m-3
+            span.fas.fa-home.fa-5x.m-2
           a.btn.btn-outline-info.ml-2.rounded[href="/media"]
-            span.fas.fa-photo-video.fa-5x.m-3
+            span.fas.fa-photo-video.fa-5x.m-2
           label.btn.btn-outline-info.ml-2.rounded.active
-            span.fas.fa-ad.fa-5x.m-3
+            span.fas.fa-ad.fa-5x.m-2
           a.btn.btn-outline-info.ml-2.rounded[href="/monitor"]
-            span.fas.fa-chart-pie.fa-5x.m-3
+            span.fas.fa-chart-pie.fa-5x.m-2
           a.btn.btn-outline-info.ml-2.rounded[href="/settings"]
-            span.fas.fa-cog.fa-5x.m-3
+            span.fas.fa-cog.fa-5x.m-2
         a.btn.btn-success.float-right[href=""]
           span.fas.fa-basketball-ball.fa-5x.m-2
     div.row.mt-5
