@@ -67,10 +67,18 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/api/mgmt/machine", machineHandler)
 
 	router.HandleFunc("/", pageHandler)
+	router.HandleFunc("/ads/{id:[0-9a-f]+}", pageHandler)
+	router.HandleFunc("/gameconfig", pageHandler)
+	router.HandleFunc("/home", pageHandler)
+	router.HandleFunc("/media/{id:[0-9a-f]+}", pageHandler)
+	router.HandleFunc("/monitor/{id:[0-9a-f]+}", pageHandler)
+	router.HandleFunc("/settings/{id:[0-9a-f]+}", pageHandler)
+	router.HandleFunc("/setup/{id:[0-9a-f]+}", pageHandler)
 
-	for k, _ := range PageIndex {
-		router.HandleFunc(fmt.Sprintf("/%s", k), pageHandler)
-	}
+	router.HandleFunc("/gamectl/{id:[0-9a-f]+}", pageHandler)
+	router.HandleFunc("/clockctl/{id:[0-9a-f]+}", pageHandler)
+	router.HandleFunc("/scoreboards/{id:[0-9a-f]+}", pageHandler)
+
 
 	/*
 	router.HandleFunc("/clock", pageHandler)
@@ -85,7 +93,6 @@ func initRouter() *mux.Router {
 	*/
 
 	router.HandleFunc("/ws/games/{id:[0-9a-f]+}", controlHandler)
-	//router.HandleFunc("/ws/game", controlHandler)
 	router.HandleFunc("/ws/subscribers/{id:[0-9a-f]+}", subscriberHandler)
 	router.HandleFunc("/ws/manager", managerHandler)
 

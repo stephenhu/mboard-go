@@ -27,12 +27,12 @@ type SubscriberStateResponse struct {
 
 //var subscribers map[*websocket.Conn] *sync.Mutex
 
-var subscribers map[string]map[*websocket.Conn] *sync.Mutex
+var subscribersMap map[string]map[*websocket.Conn] *sync.Mutex
 
 
 func sendToSubscribers(id string, j []byte) {
 
-	s, ok := subscribers[id]
+	s, ok := subscribersMap[id]
 
 	if ok {
 
@@ -134,17 +134,17 @@ func subscriberHandler(w http.ResponseWriter, r *http.Request) {
 
 		defer c.Close()
 
-		if subscribers == nil {
-			subscribers = make(map[string]map[*websocket.Conn]*sync.Mutex)
+		if subscribersMap == nil {
+			subscribersMap = make(map[string]map[*websocket.Conn]*sync.Mutex)
 		}
 
-		_, ok := subscribers[id]
+		_, ok := subscribersMap[id]
 
 		if !ok {
-			subscribers[id] = make(map[*websocket.Conn]*sync.Mutex)
+			subscribersMap[id] = make(map[*websocket.Conn]*sync.Mutex)
 		}
 
-		subscribers[id][c] = &sync.Mutex{}
+		subscribersMap[id][c] = &sync.Mutex{}
 
 		for {
 
@@ -155,7 +155,7 @@ func subscriberHandler(w http.ResponseWriter, r *http.Request) {
 				log.Println("[Error] ", err)
 
 				if websocket.IsUnexpectedCloseError(err) {
-					delete(subscribers[id], c)
+					delete(subscribersMap[id], c)
 				}
 
 				break

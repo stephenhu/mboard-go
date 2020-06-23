@@ -7,16 +7,22 @@ import (
 	"strings"
 
 	"github.com/eknkc/amber"
+	"github.com/gorilla/mux"
 )
 
 var PageIndex = map[string]string {
-	"": 					"index.amber",
-	"ads":   			"ads.amber",
-	"home": 			"home.amber",
-	"media":   "media.amber",
-	"monitor":   "monitor.amber",
-	"setup": 			"setup.amber",
-	"settings":   "settings.amber",
+	"": 								"index.amber",
+	"ads":   						"ads.amber",
+	"clockctl":   			"clockctl.amber",
+	"clocks":   				"clock.amber",
+	"gamectl":   				"gamectl.amber",
+	"gameconfig":   		"gameconfig.amber",
+	"home": 						"home.amber",
+	"media":   					"media.amber",
+	"monitor":   				"monitor.amber",
+	"scoreboards":   		"scoreboard.amber",
+	"setup": 						"setup.amber",
+	"settings":   			"settings.amber",
 }
 
 
@@ -25,9 +31,13 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
   switch r.Method {
   case http.MethodGet:
 
+		vars := mux.Vars(r)
+
+		id := vars["id"]
+
 		compiler := amber.New()
 
-		p := strings.Trim(r.URL.Path, "/")
+		p := strings.Trim(strings.Trim(r.URL.Path, id), "/")
 
 		log.Println(PageIndex[p])
 
@@ -55,7 +65,12 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(http.StatusInternalServerError)
 
 				} else {
-					template.Execute(w, nil)
+
+					d := map[string]string {
+						"id": id,
+					}
+
+					template.Execute(w, &d)
 				}
 
 			}

@@ -1,0 +1,82 @@
+extends layout
+
+block content
+  div.container-fluid.mt-5
+    div.row
+      div.col.ml-3
+        h3.display-3.text-uppercase.text-info[id="away"] Cavaliers
+        h1.display-1[id="awayScore"] 0
+      div.col.mr-3
+        h3.display-3.text-uppercase.text-info.text-right[id="home"] Lakers
+        h1.display-1.text-right[id="homeScore"] 0
+    div.row
+      div.col.ml-3
+        h5.display-4.text-info Fouls
+        h4.display-4.text-primary[id="awayFouls"] 3
+      div.col.mr-3
+        h5.display-4.text-info.text-right Fouls
+        h4.display-4.text-primary.text-right[id="homeFouls"] 3
+  div.container-fluid.fixed-bottom.mb-5
+    div.row.mt-5
+      div.col
+        div.btn-group.float-right
+          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="command('SCORE_AWAY', 1); return false;"]
+            span.fas.fa-plus.fa-3x
+          button.btn.rounded-circle.p-5.btn-outline-info[onClick="command('SCORE_AWAY', -1); return false;"]
+            span.fas.fa-minus.fa-3x
+      div.col.align-middle
+        h2.display-3.text-center 1PT
+      div.col
+        div.btn-group
+          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="command('SCORE_HOME', 1); return false;"]
+            span.fas.fa-plus.fa-3x
+          button.btn.rounded-circle.p-5.btn-outline-info[onClick="command('SCORE_HOME', -1); return false;"]
+            span.fas.fa-minus.fa-3x
+    div.row.mt-4
+      div.col
+        div.btn-group.float-right
+          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="command('SCORE_AWAY', 2); return false;"]
+            span.fas.fa-plus.fa-3x
+          button.btn.rounded-circle.p-5.btn-outline-info[onClick="command('SCORE_AWAY', -2); return false;"]
+            span.fas.fa-minus.fa-3x
+      div.col
+        h2.display-3.text-center 2PT
+      div.col
+        div.btn-group
+          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="command('SCORE_HOME', 2); return false;"]
+            span.fas.fa-plus.fa-3x
+          button.btn.rounded-circle.p-5.btn-outline-info[onClick="command('SCORE_HOME', -2); return false;"]
+            span.fas.fa-minus.fa-3x
+    div.row.mt-4
+      div.col
+        div.btn-group.float-right
+          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="command('SCORE_AWAY', 3); return false;"]
+            span.fas.fa-plus.fa-3x
+          button.btn.rounded-circle.p-5.btn-outline-info[onClick="command('SCORE_AWAY', -3); return false;"]
+            span.fas.fa-minus.fa-3x
+      div.col
+        h2.display-3.text-center 3PT
+      div.col
+        div.btn-group
+          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="command('SCORE_HOME', 3); return false;"]
+            span.fas.fa-plus.fa-3x
+          button.btn.rounded-circle.p-5.btn-outline-info[onClick="command('SCORE_HOME', -3); return false;"]
+            span.fas.fa-minus.fa-3x
+    div.row.mt-4
+      div.col
+        div.btn-group.float-right
+          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="command('FOUL_AWAY_UP'); return false;"]
+            span.fas.fa-plus.fa-3x
+          button.btn.rounded-circle.p-5.btn-outline-info[onClick="command('FOUL_AWAY_DOWN'); return false;"]
+            span.fas.fa-minus.fa-3x
+      div.col
+        h2.display-3.text-center Fouls
+      div.col
+        div.btn-group
+          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="command('FOUL_HOME_UP'); return false;"]
+            span.fas.fa-plus.fa-3x
+          button.btn.rounded-circle.p-5.btn-outline-info[onClick="command('FOUL_HOME_DOWN'); return false;"]
+            span.fas.fa-minus.fa-3x
+  script
+    subscribe(#{id});
+    gamectl(#{id});

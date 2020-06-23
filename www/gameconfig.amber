@@ -1,0 +1,50 @@
+extends layout
+
+block content
+  div.container-fluid.mt-3
+    div.row
+      div.col-xl-12
+        div.card-group
+          div.card.bg-dark
+            div.card-header Game configuration
+            div.card-body
+              div.card-title.h5 Periods
+              div.mt-1.btn-group.btn-group-toggle[id="periods"][defaultValue="4"]
+                label.rounded.mr-2.btn.btn-outline-info None
+                  input[type="radio"][name="periods"][value="0"][onChange="toggleSel('periods', this.value); return false;"]
+                label.rounded.mr-2.btn.btn-outline-info 2
+                  input[type="radio"][name="periods"][value="2"][onChange="toggleSel('periods', this.value); return false;"]
+                label.rounded.mr-2.btn.btn-outline-info.active 4
+                  input[type="radio"][name="periods"][value="4"][onChange="toggleSel('periods', this.value); return false;"]
+            div.card-body
+              div.form-group
+                label.form-label.h5 Minutes per period
+                label.ml-2.h2.text-info.form-label[id="minutesLabel"] 12
+                input.form-control-range[min="1"][max="30"][step="1"][type="range"][id="minutes"][value="12"][onchange="toggleSlider('minutes', this.value); return false;"]
+            div.card-body
+              div.form-group
+                label.form-label.h5 Shot clock
+                label.ml-2.h2.text-info.form-label[id="shotLabel"] 24
+                input.form-control-range[min="0"][max="40"][step="1"][type="range"][id="shot"][value="24"][onchange="toggleSlider('shot', this.value); return false;"]
+            div.card-body
+              div.form-group
+                label.form-label.h5 Timeouts per half
+                label.ml-2.h2.text-info.form-label[id="timeoutsLabel"] 3
+                input.form-control-range[min="0"][max="6"][step="1"][type="range"][id="timeouts"][value="3"][onchange="toggleSlider('timeouts', this.value); return false;"]
+            div.card-body
+              div.form-group
+                label.form-label.h5 Fouls per half
+                label.ml-2.h2.text-info.form-label[id="foulsLabel"] 7
+                input.form-control-range[min="1"][max="10"][step="1"][type="range"][id="fouls"][value="7"][onchange="toggleSlider('fouls', this.value); return false;"]
+            div.card-body
+              div.form-group
+                label.form-label.h5 Away team
+                input.form-control[type="text"][value="Red"][id="away"]
+            div.card-body
+              div.form-group
+                label.form-label.h5 Home team
+                input.form-control[type="text"][value="Blue"][id="home"]
+            div.card-body
+              button.btn.btn-success.btn-lg[onclick="newGame(); return false;"] Start game
+              a.btn.btn-outline-info.ml-2.btn-lg[href="/home"] Cancel
+

@@ -60,6 +60,10 @@ a {
   font-size: 5em;
 }
 
+.standard {
+  font-size: 2em;
+}
+
 /* colors */
 
 .red {

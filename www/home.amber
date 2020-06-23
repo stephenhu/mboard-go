@@ -15,7 +15,7 @@ block content
             span.fas.fa-chart-pie.fa-5x.m-2
           a.btn.btn-outline-info.ml-2.rounded[href="/settings"]
             span.fas.fa-cog.fa-5x.m-2
-        a.btn.btn-success.float-right[href=""]
+        a.btn.btn-success.float-right[href="/gameconfig"]
           span.fas.fa-basketball-ball.fa-5x.m-2
     div.row.mt-5
       div.col-xl-12

@@ -1,0 +1,64 @@
+extends layout
+
+block content
+  div.container-fluid
+    div.row
+      div.col
+        div.d-flex.justify-content-center
+          h1.d-inline.text-success.text-center.middle-big[id="clock"] 12:00
+    div.row
+      div.col
+        div.d-flex.justify-content-center
+          div.d-inline.text-info.text-center.medium[id="period"] 1st
+      div.col
+        div.d-flex.justify-content-center
+          div.d-inline.text-warning.text-center.medium[id="shot"] 24
+  div.container-fluid.fixed-bottom.mb-5
+    div.row.mt-3
+      div.col
+        button.btn.btn-outline-danger.w-100.p-2.rounded.standard[onclick="endGame(); return false;"] End game
+      div.col
+        button.btn.btn-outline-info.w-100.p-2.rounded.standard[onclick="confirmEndPeriod(); return false;"] End period
+    div.row.mt-3
+      div.col
+        h3 Game clock
+        div.btn-group
+          btn.btn.btn-outline-info.rounded.p-5
+            span.fas.fa-step-backward.fa-3x
+          btn.btn.btn-outline-info.rounded.p-5.ml-2
+            span.fas.fa-step-forward.fa-3x
+          btn.btn.btn-outline-info.rounded.p-5.ml-2
+            span.fas.fa-redo.fa-3x
+      div.col
+        h3.text-right Shot clock
+        div.btn-group.float-right
+          btn.btn.btn-outline-info.rounded.p-5
+            span.fas.fa-step-backward.fa-3x
+          btn.btn.btn-outline-info.rounded.p-5.ml-2
+            span.fas.fa-step-forward.fa-3x
+          btn.btn.btn-outline-info.rounded.p-5.ml-2
+            span.fas.fa-redo.fa-3x
+    div.row.mt-5
+      div.col
+        div.btn-group
+          button.btn.btn-outline-success.rounded.p-5.standard[onClick="callTimeout('AWAY', 1); return false;"] Cavaliers timeout (5)
+          button.btn.btn-outline-danger.rounded.ml-2.p-5.standard[onClick="callTimeout('AWAY', -1); return false;"] Cancel
+      div.col
+        div.btn-group.float-right
+          button.btn.btn-outline-success.rounded.p-5.standard[onClick="callTimeout('HOME', 1); return false;"] Lakers timeout (3)
+          button.btn.btn-outline-danger.rounded.ml-2.p-5.standard[onClick="callTimeout('HOME', -1); return false;"] Cancel
+    div.row.mt-5
+      div.col
+        button.btn.btn-info.rounded.text-uppercase.p-5.w-100.standard[onClick="togglePossession(); return false;"][id="away"] Cavaliers
+      div.col
+        button.btn.btn-outline-info.rounded.text-uppercase.p-5.w-100.standard[onClick="togglePossession(); return false;"][id="home"] Lakers
+    div.row.mt-5
+      div.col
+        center
+          button.btn.btn-success.rounded.p-5.w-100[onClick="toggleClock(); return false;"][id="play"]
+            span.fas.fa-play.fa-3x
+          button.btn.btn-danger.rounded.p-5.d-none.w-100[onClick="toggleClock(); return false;"][id="stop"]
+            span.fas.fa-stop.fa-3x
+  script
+    subscribe(#{id});
+    gamectl(#{id});

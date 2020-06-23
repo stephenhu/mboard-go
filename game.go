@@ -57,6 +57,7 @@ type GameState struct {
 	Away          *Team					`json:"away"`
 	GameClock     *Clock    		`json:"game"`
 	ShotClock     *Clock    		`json:"shot"`
+	Final         bool          `json:"final"`
 }
 
 type GameRes struct {

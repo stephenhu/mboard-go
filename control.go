@@ -59,6 +59,7 @@ const (
 	WS_RET_SHOT_VIOLATION     	= "SHOT_VIOLATION"
 	WS_RET_END_PERIOD         	= "END_PERIOD"
 	WS_RET_GAME_STATE           = "GAME_STATE"
+	WS_RET_FINAL           			= "GAME_FINAL"
 )
 
 const (
@@ -319,6 +320,14 @@ func togglePossession(id string, stopClock bool, g *GameInfo) {
 } // togglePossession
 
 
+func endGame(id string) {
+
+	delete(gameMap, id)
+	delete(subscribersMap, id)
+
+} // endGame
+
+
 func firehose(id string, g *GameInfo) {
 
 	for {
@@ -365,6 +374,11 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if g.Final {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	upgrader := websocket.Upgrader {
 		ReadBufferSize:		1024,
 		WriteBufferSize: 	1024,
@@ -386,6 +400,11 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 
+		if g.Final {
+			pushString(id, WS_RET_FINAL, id)
+			break
+		}
+
 		_, msg, err := c.ReadMessage()
 
 		if err != nil {
@@ -396,7 +415,7 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if msg == nil || len(msg) == 0 {
-			break
+			continue
 		}
 
 		req := Req{}
@@ -440,6 +459,7 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 
 		case WS_FINAL:
 			g.Final = true
+			endGame(id)
 
 		case WS_ABORT:
 			g.GameData.Clk.Stop()
@@ -491,8 +511,6 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		case WS_GAME_STATE:
-
-			log.Println(g)
 
 			gs := GameState{
 				Settings: g.Settings,
