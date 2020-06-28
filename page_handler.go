@@ -20,7 +20,6 @@ var PageIndex = map[string]string {
 	"home": 						"home.amber",
 	"media":   					"media.amber",
 	"monitor":   				"monitor.amber",
-	"notfound":         "notfound.amber",
 	"scoreboards":   		"scoreboard.amber",
 	"setup": 						"setup.amber",
 	"settings":   			"settings.amber",
@@ -53,7 +52,9 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 				_, ok := gameMap[id]
 
 				if !ok {
-					page = "gamenotfound.amber"
+					//w.WriteHeader(http.StatusNotFound)
+					http.Redirect(w, r, "/notfound", http.StatusNotFound)
+					return
 				}
 
 			}
