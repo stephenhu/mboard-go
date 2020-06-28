@@ -20,10 +20,10 @@ var PageIndex = map[string]string {
 	"home": 						"home.amber",
 	"media":   					"media.amber",
 	"monitor":   				"monitor.amber",
+	"notfound":         "notfound.amber",
 	"scoreboards":   		"scoreboard.amber",
 	"setup": 						"setup.amber",
 	"settings":   			"settings.amber",
-	"gamenotfound":     "gamenotfound.amber",
 }
 
 

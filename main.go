@@ -74,11 +74,12 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/monitor", pageHandler)
 	router.HandleFunc("/settings", pageHandler)
 	router.HandleFunc("/setup", pageHandler)
-	router.HandleFunc("/gamenotfound", pageHandler)
 
 	router.HandleFunc("/gamectl/{id:[0-9a-f]+}", pageHandler)
 	router.HandleFunc("/clockctl/{id:[0-9a-f]+}", pageHandler)
 	router.HandleFunc("/scoreboards/{id:[0-9a-f]+}", pageHandler)
+
+	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 
 	/*
 	router.HandleFunc("/clock", pageHandler)
