@@ -23,6 +23,7 @@ var PageIndex = map[string]string {
 	"scoreboards":   		"scoreboard.amber",
 	"setup": 						"setup.amber",
 	"settings":   			"settings.amber",
+	"gamenotfound":     "gamenotfound.amber",
 }
 
 
@@ -46,6 +47,16 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		if !ok {
 			w.WriteHeader(http.StatusNotFound)
 		} else {
+
+			if id != "" {
+
+				_, ok := gameMap[id]
+
+				if !ok {
+					page = "gamenotfound.amber"
+				}
+
+			}
 
 			err := compiler.ParseFile(fmt.Sprintf("%s/%s", MBOARD_WWW, page))
 

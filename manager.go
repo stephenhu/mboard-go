@@ -97,7 +97,7 @@ func managerHandler(w http.ResponseWriter, r *http.Request) {
 
 		case WS_SCOREBOARD:
 
-			if g.Active {
+			if g.Game.Active {
 				pushMap(id, WS_SCOREBOARD, mc.Options)
 			} else {
 				pushMap(id, WS_SETUP, mc.Options)

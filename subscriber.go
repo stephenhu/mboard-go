@@ -25,8 +25,6 @@ type SubscriberStateResponse struct {
 	State     *GameState    `json:"state"`
 }
 
-//var subscribers map[*websocket.Conn] *sync.Mutex
-
 var subscribersMap map[string]map[*websocket.Conn] *sync.Mutex
 
 
@@ -104,6 +102,21 @@ func pushMap(id string, msg string, options map[string] string) {
 } // pushMap
 
 
+func cleanupSubscribers(id string) {
+
+	s, ok := subscribersMap[id]
+
+	if ok {
+
+		for conn, _ := range s {
+			conn.Close()
+		}
+
+	}
+
+} // cleanupSubscribers
+
+
 func subscriberHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
@@ -163,8 +176,7 @@ func subscriberHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if msg == nil {
-				log.Println(msg)
-				break
+				continue
 			}
 
 		}

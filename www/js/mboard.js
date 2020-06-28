@@ -1,8 +1,9 @@
 // mboard.js
 
 const REST_API          = "/api";
-const WS_SUBSCRIBER     = "ws://10.0.1.20:8000/ws/subscribers";
-const WS_GAME           = "ws://localhost:8000/ws/games";
+const WS_SUBSCRIBER     = "ws://localhost:8000/ws/subscribers";
+const WS_SCORE          = "ws://localhost:8000/ws/scores";
+const WS_CLOCK          = "ws://localhost:8000/ws/clocks";
 const WS_MANAGER        = "ws://localhost:8000/ws/manager";
 
 const API_PARAM_GAME_CONFIG = "gameConfig";
@@ -10,6 +11,7 @@ const API_PARAM_GAME_CONFIG = "gameConfig";
 const PERIODS = ["1st", "2nd", "3rd", "4th"];
 
 let ctl           = null;
+let clockctl      = null;
 let subscriber    = null;
 
 
@@ -170,13 +172,13 @@ function toggleClock() {
   if(!getClockState()) {
 
     playButton();
-    command("CLOCK_STOP");
+    clockCommand("CLOCK_STOP");
 
 
   } else {
 
     stopButton();
-    command("CLOCK_START");
+    clockCommand("CLOCK_START");
 
   }
 
@@ -186,47 +188,84 @@ function toggleClock() {
 function clockStop() {
 
   playButton();
-  command("CLOCK_STOP");
+  clockCommand("CLOCK_STOP");
 
 } // clockStop
 
 
-function getPossession() {
+function checkPossession() {
 
   var away = document.getElementById("away");
   var home = document.getElementById("home");
 
   if(away === null || home === null) {
     return false;
-  }
-
-  if(away.getAttribute("class").includes("btn-info")) {
-    return false;
   } else {
     return true;
+  }
+
+} // checkPossession
+
+
+function updatePossession(team) {
+
+  if(checkPossession()) {
+
+    var away = document.getElementById("away");
+    var home = document.getElementById("home");
+
+    if(team === "HOME") {
+      away.setAttribute("class", "btn btn-outline-info rounded text-uppercase p-5 w-100 standard");
+      home.setAttribute("class", "btn btn-info rounded text-uppercase p-5 w-100 standard");
+    } else {
+      away.setAttribute("class", "btn btn-info rounded text-uppercase p-5 w-100 standard");
+      home.setAttribute("class", "btn btn-outline-info rounded text-uppercase p-5 w-100 standard");
+    }
+
+  }
+
+} // updatePossession
+
+
+function getPossession() {
+
+  if(checkPossession()) {
+
+    if(away.getAttribute("class").includes("btn-info")) {
+      return false;
+    } else {
+      return true;
+    }
+
   }
 
 } // getPossession
 
 
-function togglePossession() {
+function setPossession(team) {
 
-  var away = document.getElementById("away");
-  var home = document.getElementById("home");
+  if(team === "HOME") {
+    clockCommand("POSSESSION_HOME", null, {"stop": getClockState()});
+  } else {
+    clockCommand("POSSESSION_AWAY", null, {"stop": getClockState()});
+  }
+
+} // setPossession
+
+
+function togglePossession() {
 
   // TODO: create a mechanism that can keep set of classes and append/pop
   if(getPossession()) {
-    away.setAttribute("class", "btn btn-info rounded text-uppercase p-5 w-100 standard");
-    home.setAttribute("class", "btn btn-outline-info rounded text-uppercase p-5 w-100 standard");
 
-    command("POSSESSION_AWAY", null, {"stop": getClockState()});
+    //setPossession("AWAY");
+    clockCommand("POSSESSION_AWAY", null, {"stop": getClockState()});
 
   } else {
 
-    away.setAttribute("class", "btn btn-outline-info rounded text-uppercase p-5 w-100 standard");
-    home.setAttribute("class", "btn btn-info rounded text-uppercase p-5 w-100 standard");
+    //setPossession("HOME");
 
-    command("POSSESSION_HOME", null, {"stop": getClockState()});
+    clockCommand("POSSESSION_HOME", null, {"stop": getClockState()});
 
   }
 
@@ -421,7 +460,7 @@ function endGame() {
   let ans = confirm("Are you sure you want to end game?");
 
   if(ans) {
-    command("FINAL");
+    clockCommand("FINAL");
     window.location = "/home";
   }
 
@@ -435,7 +474,7 @@ function confirmEndPeriod() {
   let ans = confirm("If you wish to the end period, changes can no longer be made.");
 
   if(ans) {
-    command("PERIOD_UP");
+    clockCommand("PERIOD_UP");
   }
 
 } // confirmEndPeriod
@@ -450,7 +489,26 @@ function gameFinal() {
 } // gameFinal
 
 
-function command(cmd, step, meta) {
+function shotClockViolation() {
+
+  playButton();
+  togglePossession();
+
+} // shotClockViolation
+
+
+function clockCommand(cmd, step, meta) {
+
+  clockctl.send(JSON.stringify({
+    "cmd": cmd,
+    "step": step,
+    "meta": meta
+  }));
+
+} // clockCommand
+
+
+function scoreCommand(cmd, step, meta) {
 
   ctl.send(JSON.stringify({
     "cmd": cmd,
@@ -458,12 +516,15 @@ function command(cmd, step, meta) {
     "meta": meta
   }));
 
-} // command
+} // scoreCommand
 
 
 function listener(obj) {
 
+  console.log(obj);
+
   switch(obj.key) {
+
     case "HOME_SCORE":
       updateScore("HOME", obj.val);
       break;
@@ -481,7 +542,6 @@ function listener(obj) {
       break;
 
     case "GAME_STATE":
-      console.log(obj);
       updateState(obj);
       break;
 
@@ -502,12 +562,19 @@ function listener(obj) {
       break;
 
     case "SHOT_VIOLATION":
-      playButton();
-      togglePossession();
+      shotClockViolation();
       break;
 
     case "GAME_FINAL":
       gameFinal();
+      break;
+
+    case "POSSESSION_HOME":
+      updatePossession("HOME");
+      break;
+
+    case "POSSESSION_AWAY":
+      updatePossession("AWAY");
       break;
 
     default:
@@ -527,7 +594,8 @@ function subscribe(id) {
   }
 
   subscriber.onclose = function(e) {
-    console.log("Subscription closed, game does not exist or has been completed.");
+    console.log(e);
+    //window.location = "/home";
   }
 
   subscriber.onmessage = function(e) {
@@ -539,18 +607,18 @@ function subscribe(id) {
   }
 
   subscriber.onerror = function(e) {
-    console.log(e);
+    console("Subscribe error");
   }
 
 } // subscribe
 
 
-function gamectl(id) {
+function scoreSocket(id) {
 
-  ctl = new WebSocket(`${WS_GAME}/${id}`);
+  ctl = new WebSocket(`${WS_SCORE}/${id}`);
 
   ctl.onopen = function(e) {
-    console.log("Game connection successful.");
+    console.log("Game connected successfully.");
     ctl.send(JSON.stringify({"cmd": "GAME_STATE"}));
   }
 
@@ -558,8 +626,38 @@ function gamectl(id) {
 
   }
 
+  ctl.onclose = function(e) {
+    console.log(e);
+    console.log("Unable to connect to game controller.");
+  }
+
   ctl.onerror = function(e) {
     console.log(e);
   }
 
-} // gamectl
+} // scoreSocket
+
+
+function clockSocket(id) {
+
+  clockctl = new WebSocket(`${WS_CLOCK}/${id}`);
+
+  clockctl.onopen = function(e) {
+    console.log("Clock connected successfully.");
+    clockctl.send(JSON.stringify({"cmd": "GAME_STATE"}));
+  }
+
+  clockctl.onmessage = function(e) {
+    console.log(e.data);
+  }
+
+  clockctl.onclose = function(e) {
+    alert("Unable to connect or connection lost, please try reconnecting.");
+    window.location = "/home";
+  }
+
+  clockctl.onerror = function(e) {
+    console.log(e);
+  }
+
+} // clockSocket

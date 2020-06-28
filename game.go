@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	//"github.com/gorilla/websocket"
+	"github.com/gorilla/websocket"
 
 )
 
@@ -42,10 +42,15 @@ type GameConfig struct {
 type GameInfo struct {
   Settings			*GameConfig
 	GameData			*Game
-	//Conns 				map[*websocket.Conn]*sync.Mutex
 	Final         bool
 	Created       int64
 	Active        bool
+}
+
+type GameCtl struct {
+	ScoreCtl 			*websocket.Conn
+	ClockCtl 			*websocket.Conn
+	Game          *GameInfo
 }
 
 //TODO: remove gamestate struct?
@@ -64,7 +69,7 @@ type GameRes struct {
 	Msg 	string 	`json:"msg"`
 }
 
-var gameMap = map[string]GameInfo{}
+var gameMap map[string]*GameCtl
 
 var fields = []string{HOME, AWAY, PERIODS, MINUTES, FOULS, TIMEOUTS, SHOT}
 
@@ -169,9 +174,15 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 					Active: true,
 				}
 
+				if gameMap == nil {
+					gameMap = make(map[string]*GameCtl)
+				}
+
 				addGame(config, ts)
 
-				gameMap[id] = gi
+				gameMap[id] = &GameCtl {
+					Game: &gi,
+				}
 
 				pushMap(id, WS_SCOREBOARD, nil)
 
@@ -194,7 +205,7 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 			games := map[string]string{}
 
 			for k, v := range gameMap {
-				games[k] = v.Settings.Sport
+				games[k] = v.Game.Settings.Sport
 			}
 
 			log.Println(games)
@@ -216,13 +227,13 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 			if ok {
 
 				gs := GameState{
-					Settings: g.Settings,
-					Period: g.GameData.Period,
-					Possession: g.GameData.Possession,
-					Home: g.GameData.Home,
-					Away: g.GameData.Away,
-					GameClock: g.GameData.Clk.PlayClock,
-					ShotClock: g.GameData.Clk.ShotClock,
+					Settings: g.Game.Settings,
+					Period: g.Game.GameData.Period,
+					Possession: g.Game.GameData.Possession,
+					Home: g.Game.GameData.Home,
+					Away: g.Game.GameData.Away,
+					GameClock: g.Game.GameData.Clk.PlayClock,
+					ShotClock: g.Game.GameData.Clk.ShotClock,
 				}
 
 				j, jsonErr := json.Marshal(gs)
@@ -247,10 +258,10 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 
 		g, ok := gameMap[id]
 
-	  if ok && g.Active {
+	  if ok && g.Game.Active {
 
-			g.Active = false
-			g.Final 	= true
+			g.Game.Active = false
+			g.Game.Final 	= true
 /*
 			gr := GameRecord{}
 

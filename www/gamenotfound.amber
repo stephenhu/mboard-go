@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  div.container-fluid.m-5
+    div.row
+      div.col
+        h1.medium.text-info 404 not found
+        h1.standard The resource you were looking for does not exist or cannot be found.
+        a.btn.btn-lg.btn-outline-danger.mt-3[href="/home"] Return home
+        h2.m-3.fixed-bottom madsportlsab
+
