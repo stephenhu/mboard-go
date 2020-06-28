@@ -73,7 +73,7 @@ block content
         h2.display-3.text-center Fouls
       div.col
         div.btn-group
-          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="coscoreCommandmmand('FOUL_HOME_UP'); return false;"]
+          button.btn.rounded-circle.p-5.mr-3.btn-outline-info[onClick="scoreCommand('FOUL_HOME_UP'); return false;"]
             span.fas.fa-plus.fa-3x
           button.btn.rounded-circle.p-5.btn-outline-info[onClick="scoreCommand('FOUL_HOME_DOWN'); return false;"]
             span.fas.fa-minus.fa-3x

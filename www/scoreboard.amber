@@ -1,0 +1,43 @@
+extends layout
+
+block content
+  div.container-fluid.m-5
+    div.row
+      div.col-xl-8
+        h1.too-big.shade.text-success.text-center[id="clock"] 12:00
+      div.col-xl-2
+        h1.middle-big.shade.light-blue[id="period"] 1st
+      div.col-xl-2
+        h1.middle-big.text-center.shade.text-success[id="shot"] 24
+    div.row
+      div.col-xl-6
+        h1.medium.text-center.shade.text-info[id="away"] Bulls
+        h1.too-big.text-center.shade[id="awayScore"] 89
+      div.col-xl-6
+        h1.medium.text-center.shade.text-info[id="home"] Jazz
+        h1.too-big.text-center.shade[id="homeScore"] 84
+    div.row
+      div.col-xl-1
+        p.regular.text-info Fouls
+      div.col-xl-1
+        p.regular.text-success.ml-2[id="awayFouls"] 8
+      div.col-xl-2
+        p.regular.text-info.float-right Timeouts
+      div.col-xl-2
+        div[id="awayTimeouts"]
+          span.fas.fa-circle.regular.text-success.text-right
+          span.fas.fa-circle.regular.text-success.text-right
+          span.fas.fa-circle.regular.text-success.text-right
+      div.col-xl-1
+        p.regular.text-info Fouls
+      div.col-xl-1
+        p.regular.text-success.ml-2[id="homeFouls"] 7
+      div.col-xl-2
+        p.regular.text-info.float-right Timeouts
+      div.col-xl-2
+        div[id="homeTimeouts"]
+          span.fas.fa-circle.regular.text-success.text-right
+          span.fas.fa-circle.regular.text-success.text-right
+          span.fas.fa-circle.regular.text-success.text-right
+  script
+    subscribe(#{id});

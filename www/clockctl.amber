@@ -49,9 +49,9 @@ block content
           button.btn.btn-outline-danger.rounded.ml-2.p-5.standard[onClick="callTimeout('HOME', -1); return false;"] Cancel
     div.row.mt-5
       div.col
-        button.btn.btn-info.rounded.text-uppercase.p-5.w-100.standard[onClick="setPossession('AWAY'); return false;"][id="away"] Cavaliers
+        button.btn.btn-info.rounded.text-uppercase.p-5.w-100.standard[onClick="setPossession('AWAY'); return false;"][id="awayPos"] Cavaliers
       div.col
-        button.btn.btn-outline-info.rounded.text-uppercase.p-5.w-100.standard[onClick="setPossession('HOME'); return false;"][id="home"] Lakers
+        button.btn.btn-outline-info.rounded.text-uppercase.p-5.w-100.standard[onClick="setPossession('HOME'); return false;"][id="homePos"] Lakers
     div.row.mt-5
       div.col
         center

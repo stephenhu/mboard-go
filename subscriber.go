@@ -123,7 +123,7 @@ func subscriberHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := vars["id"]
 
-	_, ok := gameMap[id]
+	g, ok := gameMap[id]
 
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
@@ -158,6 +158,18 @@ func subscriberHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		subscribersMap[id][c] = &sync.Mutex{}
+
+		gs := GameState{
+			Settings: g.Game.Settings,
+			Period: g.Game.GameData.Period,
+			Possession: g.Game.GameData.Possession,
+			Home: g.Game.GameData.Home,
+			Away: g.Game.GameData.Away,
+			GameClock: g.Game.GameData.Clk.PlayClock,
+			ShotClock: g.Game.GameData.Clk.ShotClock,
+		}
+
+		pushState(id, &gs)
 
 		for {
 

@@ -57,6 +57,20 @@ const (
 var periodNames = []string{"1st", "2nd", "3rd", "4th"}
 
 
+func checkGameOver(g *GameInfo) bool {
+
+	home := calcTotalScore(true, g)
+	away := calcTotalScore(false, g)
+
+	if g.GameData.Period >= 3 && away == home {
+		return true
+	} else {
+		return false
+	}
+
+} // checkGameOver
+
+
 func incrementTimeout(id string, name string, val int, g *GameInfo) bool {
 
   if g == nil {
@@ -126,11 +140,19 @@ func incrementPeriod(id string, val int, g *GameInfo) {
 		return
 	}
 
-  g.GameData.Period = g.GameData.Period + val
+	// TODO: check game over condition
 
-	g.GameData.Clk.GameClockReset()
+	if checkGameOver(g) {
+		endGame(id)
+	} else {
 
-  pushString(id, WS_RET_PERIOD, fmt.Sprintf("%d", g.GameData.Period))
+		g.GameData.Period = g.GameData.Period + val
+
+		g.GameData.Clk.GameClockReset()
+
+		pushString(id, WS_RET_PERIOD, fmt.Sprintf("%d", g.GameData.Period))
+
+	}
 
 } // incrementPeriod
 
@@ -193,10 +215,13 @@ func endGame(id string) {
 
 	if ok {
 
-		g.Game.GameData.Clk.FinalChan <- true
+		if g.ScoreCtl != nil {
+			g.ScoreCtl.Close()
+		}
 
-		g.ScoreCtl.Close()
-		g.ClockCtl.Close()
+		if g.ClockCtl != nil {
+			g.ClockCtl.Close()
+		}
 
 		cleanupSubscribers(id)
 		delete(gameMap, id)
@@ -224,6 +249,9 @@ func firehose(id string, g *GameInfo) {
 		case <-g.GameData.Clk.FinalChan:
 
 			g.GameData.Clk.Ticker.Stop()
+
+			endGame(id)
+
 			pushString(id, WS_RET_END_PERIOD, "1")
 
 		case s := <-g.GameData.Clk.OutChan:
@@ -348,7 +376,8 @@ func clockControlHandler(w http.ResponseWriter, r *http.Request) {
 		case WS_FINAL:
 
 			g.Game.Final = true
-			endGame(id)
+			//endGame(id)
+			g.Game.GameData.Clk.FinalChan <- true
 			break
 
 		case WS_ABORT:

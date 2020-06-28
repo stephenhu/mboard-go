@@ -195,8 +195,8 @@ function clockStop() {
 
 function checkPossession() {
 
-  var away = document.getElementById("away");
-  var home = document.getElementById("home");
+  var away = document.getElementById("awayPos");
+  var home = document.getElementById("homePos");
 
   if(away === null || home === null) {
     return false;
@@ -211,8 +211,8 @@ function updatePossession(team) {
 
   if(checkPossession()) {
 
-    var away = document.getElementById("away");
-    var home = document.getElementById("home");
+    var away = document.getElementById("awayPos");
+    var home = document.getElementById("homePos");
 
     if(team === "HOME") {
       away.setAttribute("class", "btn btn-outline-info rounded text-uppercase p-5 w-100 standard");
@@ -231,12 +231,16 @@ function getPossession() {
 
   if(checkPossession()) {
 
+    var away = document.getElementById("awayPos");
+
     if(away.getAttribute("class").includes("btn-info")) {
       return false;
     } else {
       return true;
     }
 
+  } else {
+    return false;
   }
 
 } // getPossession
@@ -359,6 +363,24 @@ function updateTeam(team, val) {
 } // updateTeam
 
 
+function updateTeamPos(team, val) {
+
+  var homePos = document.getElementById("homePos");
+  var awayPos = document.getElementById("awayPos");
+
+  if(homePos === null || awayPos === null) {
+    return;
+  }
+
+  if(team === "HOME") {
+    homePos.innerText = val;
+  } else {
+    awayPos.innerText = val;
+  }
+
+} // updateTeamPos
+
+
 function updateClock(gameCur, shotCur, minConf, shotConf) {
 
   var clock = document.getElementById("clock");
@@ -419,6 +441,9 @@ function updateState(o) {
     updateTeam("HOME", o.state.home.name);
     updateTeam("AWAY", o.state.away.name);
 
+    updateTeamPos("HOME", o.state.home.name);
+    updateTeamPos("AWAY", o.state.away.name);
+
     updateClock(o.state.game, o.state.shot, o.state.settings.minutes,
       o.state.settings.shot);
 
@@ -477,14 +502,32 @@ function endGame() {
 } // endGame
 
 
+function checkPeriod() {
+
+  var period  = document.getElementById("period");
+  var away    = document.getElementById("awayScore");
+  var home    = document.getElementById("homeScore");
+
+  console.log(period.value);
+
+  return true;
+
+  //if(period.value === )
+} // checkPeriod
+
+
 function confirmEndPeriod() {
 
   clockStop();
 
-  let ans = confirm("If you wish to the end period, changes can no longer be made.");
+  if(checkPeriod()) {
 
-  if(ans) {
-    clockCommand("PERIOD_UP");
+    let ans = confirm("If you wish to the end period, changes can no longer be made to that period.");
+
+    if(ans) {
+      clockCommand("PERIOD_UP");
+    }
+
   }
 
 } // confirmEndPeriod
@@ -600,7 +643,7 @@ function subscribe(id) {
   subscriber = new WebSocket(`${WS_SUBSCRIBER}/${id}`);
 
   subscriber.onopen = function(e) {
-    console.log("Subscribed successfully.")
+    console.log("Subscribed successfully.");
   }
 
   subscriber.onclose = function(e) {
@@ -629,7 +672,7 @@ function scoreSocket(id) {
 
   ctl.onopen = function(e) {
     console.log("Game connected successfully.");
-    ctl.send(JSON.stringify({"cmd": "GAME_STATE"}));
+    //ctl.send(JSON.stringify({"cmd": "GAME_STATE"}));
   }
 
   ctl.onmessage = function(e) {
@@ -654,7 +697,7 @@ function clockSocket(id) {
 
   clockctl.onopen = function(e) {
     console.log("Clock connected successfully.");
-    clockctl.send(JSON.stringify({"cmd": "GAME_STATE"}));
+    //clockctl.send(JSON.stringify({"cmd": "GAME_STATE"}));
   }
 
   clockctl.onmessage = function(e) {
