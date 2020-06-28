@@ -244,6 +244,16 @@ function getPossession() {
 
 function setPossession(team) {
 
+  var p = getPossession()
+
+  if(p && team === "HOME") {
+    return;
+  }
+
+  if(!p && team === "AWAY") {
+    return;
+  }
+
   if(team === "HOME") {
     clockCommand("POSSESSION_HOME", null, {"stop": getClockState()});
   } else {
