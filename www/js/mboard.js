@@ -638,7 +638,23 @@ function listener(obj) {
 } // listener
 
 
-function subscribe(id) {
+function getId() {
+
+  var p = window.location.pathname.split("/");
+
+  if(p.length > 0) {
+    return p[p.length-1];
+  } else {
+    return "";
+  }
+
+
+} // getId
+
+
+function subscribe() {
+
+  var id = getId();
 
   subscriber = new WebSocket(`${WS_SUBSCRIBER}/${id}`);
 
@@ -660,13 +676,15 @@ function subscribe(id) {
   }
 
   subscriber.onerror = function(e) {
-    console("Subscribe error");
+    console.log("Subscribe error");
   }
 
 } // subscribe
 
 
-function scoreSocket(id) {
+function scoreSocket() {
+
+  var id = getId();
 
   ctl = new WebSocket(`${WS_SCORE}/${id}`);
 
@@ -691,7 +709,9 @@ function scoreSocket(id) {
 } // scoreSocket
 
 
-function clockSocket(id) {
+function clockSocket() {
+
+  var id = getId();
 
   clockctl = new WebSocket(`${WS_CLOCK}/${id}`);
 
@@ -706,7 +726,7 @@ function clockSocket(id) {
 
   clockctl.onclose = function(e) {
     alert("Unable to connect or connection lost, please try reconnecting.");
-    window.location = "/home";
+    //window.location = "/home";
   }
 
   clockctl.onerror = function(e) {

@@ -60,5 +60,5 @@ block content
           button.btn.btn-danger.rounded.p-5.d-none.w-100[onClick="toggleClock(); return false;"][id="stop"]
             span.fas.fa-stop.fa-3x
   script
-    subscribe(#{id});
-    clockSocket(#{id});
+    subscribe();
+    clockSocket();

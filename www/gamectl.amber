@@ -78,5 +78,5 @@ block content
           button.btn.rounded-circle.p-5.btn-outline-info[onClick="scoreCommand('FOUL_HOME_DOWN'); return false;"]
             span.fas.fa-minus.fa-3x
   script
-    subscribe(#{id});
-    scoreSocket(#{id});
+    subscribe();
+    scoreSocket();

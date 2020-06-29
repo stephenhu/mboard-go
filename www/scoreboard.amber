@@ -40,4 +40,4 @@ block content
           span.fas.fa-circle.regular.text-success.text-right
           span.fas.fa-circle.regular.text-success.text-right
   script
-    subscribe(#{id});
+    subscribe();
