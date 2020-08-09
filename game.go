@@ -168,6 +168,7 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 						Home: h,
 						Away: a,
 						Clk: c,
+						Possession: true,
 					},
 					Final: false,
 					Created: ts,

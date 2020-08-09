@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
   "log"
+	"net"
 	"net/http"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 )
 
 var conf 			= flag.String("conf", APP_CONFIG, "configuration file")
-var mode      = flag.Int("mode", MODE_WIFI, "configuration mode")
+var mode      = flag.Int("mode", MODE_WIRED, "configuration mode")
 
 
 //var data *sql.DB = nil
@@ -66,18 +67,18 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/api/mgmt/details", detailsHandler)
 	router.HandleFunc("/api/mgmt/machine", machineHandler)
 
-	router.HandleFunc("/", pageHandler)
-	router.HandleFunc("/ads", pageHandler)
-	router.HandleFunc("/gameconfig", pageHandler)
-	router.HandleFunc("/home", pageHandler)
-	router.HandleFunc("/media", pageHandler)
-	router.HandleFunc("/monitor", pageHandler)
-	router.HandleFunc("/settings", pageHandler)
-	router.HandleFunc("/setup", pageHandler)
+	//router.HandleFunc("/", pageHandler)
+	//router.HandleFunc("/ads", pageHandler)
+	//router.HandleFunc("/gameconfig", pageHandler)
+	//router.HandleFunc("/home", pageHandler)
+	//router.HandleFunc("/media", pageHandler)
+	//router.HandleFunc("/monitor", pageHandler)
+	//router.HandleFunc("/settings", pageHandler)
+	//router.HandleFunc("/setup", pageHandler)
 
-	router.HandleFunc("/gamectl/{id:[0-9a-f]+}", pageHandler)
-	router.HandleFunc("/clockctl/{id:[0-9a-f]+}", pageHandler)
-	router.HandleFunc("/scoreboards/{id:[0-9a-f]+}", pageHandler)
+	//router.HandleFunc("/gamectl/{id:[0-9a-f]+}", pageHandler)
+	//router.HandleFunc("/clockctl/{id:[0-9a-f]+}", pageHandler)
+	//router.HandleFunc("/scoreboards/{id:[0-9a-f]+}", pageHandler)
 
 	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 
@@ -107,7 +108,7 @@ func generateQR() {
 
 	log.Println("generating QR code...")
 
-	ip, err := getAddress()
+	ip, err := getAddress2()
 
 	if err != nil {
 		log.Fatal(err)
@@ -125,7 +126,24 @@ func generateQR() {
 } // generateQR
 
 
+func lilnig() {
+
+	ips, err := net.LookupIP("host.docker.internal")
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	for _, ip := range ips {
+		log.Println(ip.String())
+	}
+
+}
+
+
 func main() {
+
+  lilnig()
 
   flag.Parse()
 
