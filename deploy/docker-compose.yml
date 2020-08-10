@@ -21,7 +21,7 @@ services:
     image: "redis"
     restart: "unless-stopped"
     volumes:
-    - "redisdata:/data"
+      - "redisdata:/data"
   mboard:
     image: "mboard-go"
     labels:
@@ -33,12 +33,12 @@ services:
       - "./secrets:/run/secrets"
     depends_on:
       - "redis"
-  mboard-react:
-    image: "mboard-react"
+  mboardjs:
+    image: "mboardjs"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mboard-react.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.mboard-react.entrypoints=web"
+      - "traefik.http.routers.mboardjs.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.mboardjs.entrypoints=web"
     restart: "unless-stopped"
     depends_on:
       - "mboard"

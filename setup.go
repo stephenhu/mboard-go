@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"strings"
 
 	//"github.com/skip2/go-qrcode"
@@ -129,14 +128,3 @@ func getAddress2() (string, error) {
 
 } // getAddress2
 
-
-func setupHandler(w http.ResponseWriter, r *http.Request) {
-
-  switch r.Method {
-	case http.MethodGet:
-
-	default:
-	  w.WriteHeader(http.StatusMethodNotAllowed)
-	}
-
-} // setupHandler
