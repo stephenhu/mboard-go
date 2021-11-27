@@ -1,0 +1,15 @@
+mboard-go
+.DS_Store
+jquery
+db/mboard.db
+data/mboard.db
+test.log
+data
+blobs
+*.gz
+secrets/config.json
+deploy/secrets/config.json
+client/bootstrap
+www/bootstrap
+www/fontawesome
+www/qr.png

@@ -1,0 +1,17 @@
+# migrate sqlite3 database
+
+/home/mboard/bin/migrate -database sqlite3:///home/mboard/data/mboard.db -source file:///home/mboard/data/migrations up
+
+# enable and start service
+
+if [ -d /run/systemd/system ]; then
+  systemctl --system daemon-reload >/dev/null || true
+  if ! deb-systemd-invoke is-enabled mboard >/dev/null
+  then
+    deb-systemd-invoke enable mboard >/dev/null || true
+  fi
+  deb-systemd-invoke start mboard >/dev/null || true
+fi
+
+exit 0
+

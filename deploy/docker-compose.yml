@@ -1,0 +1,46 @@
+version: "3.3"
+
+services:
+  traefik:
+    image: "traefik"
+    command:
+      - "--global.sendAnonymousUsage=false"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.traefik.address=:8080"
+      - "--log.level=WARN"
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  redis:
+    image: "redis"
+    restart: "unless-stopped"
+    volumes:
+      - "redisdata:/data"
+  mboard:
+    image: "mboard-go"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mboard.rule=PathPrefix(`/api`, `/ws`)"
+      - "traefik.http.routers.mboard.entrypoints=web"
+    restart: "unless-stopped"
+    volumes:
+      - "./secrets:/run/secrets"
+    depends_on:
+      - "redis"
+  mboardjs:
+    image: "mboardjs"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mboardjs.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.mboardjs.entrypoints=web"
+    restart: "unless-stopped"
+    depends_on:
+      - "mboard"
+volumes:
+  redisdata: {}
